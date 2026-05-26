@@ -15,11 +15,11 @@ PhantomVfs 설계·AutoCAD VFS 실측은 **별도 저장소**를 참조합니다
 | 항목 | 내용 |
 |------|------|
 | **솔루션** | `eDIAN Plus for ZWCAD 2026.sln` |
-| **프로젝트** | Main, Data, Core, Service, Service.Core, Setup — **Hook / Hook.Native 없음** (Phase 1) |
+| **프로젝트** | Main, Data, Core, Service, Service.Core, Setup, **Hook**, **Hook.Native** — VFS Install은 **비활성** (Phase 2 진행 중) |
 | **TFM** | .NET Framework **4.8** (`packages.config`, ZWCAD `ZwSoft.*` HintPath) |
 | **UI** | XAML `MainForm` + `PluginFormManager` (WinForm UI 미사용) |
 | **Phase 1** | **완료** — VFS 없이 MIP·팔레트·Service 동작 확인 |
-| **Phase 2** | `eDIAN.Hook` + `eDIAN.Hook.Native` 이관 — **0단계 착수 게이트 완료** (`PHASE2_KICKOFF_GATE.md`, 브랜치 `feature/phase2-vfs`). 1~3단계 진행 / Setup·VFS ON은 단계별 재확인 |
+| **Phase 2** | Hook/Native **솔루션 포함·빌드 OK** (1~3단계). `VfsInterceptor` **비활성**. Setup·VFS ON은 단계별 재확인 (`ROADMAP_PHASE2_VFS.md`) |
 
 ## ZWCAD에서 반드시 유지 (덮어쓰기 금지)
 

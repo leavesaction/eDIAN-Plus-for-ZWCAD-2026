@@ -208,6 +208,10 @@
       <Project>{dadb24fe-c762-4161-9127-dd1c667ae3e9}</Project>
       <Name>eDIAN.Data</Name>
     </ProjectReference>
+    <ProjectReference Include="..\eDIAN.Hook\eDIAN.Hook.csproj">
+      <Project>{c8f4a2b1-3e5d-4f7a-9b2c-1d4e6f8a0b2c}</Project>
+      <Name>eDIAN.Hook</Name>
+    </ProjectReference>
     <ProjectReference Include="..\eDIAN.Service.Core\eDIAN.Service.Core.csproj">
       <Project>{91B3669B-7350-4247-9E5A-6B5AB85A3415}</Project>
       <Name>eDIAN.Service.Core</Name>
@@ -295,4 +299,20 @@
   </Target>
   <Import Project="..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets" Condition="Exists('..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" />
   <Import Project="..\packages\Microsoft.InformationProtection.File.1.18.103\build\net48\Microsoft.InformationProtection.File.targets" Condition="Exists('..\packages\Microsoft.InformationProtection.File.1.18.103\build\net48\Microsoft.InformationProtection.File.targets')" />
+  <!-- eDIAN.Hook.Native (vcxproj): MSBuild 선행 빌드 — ZWCAD 출력 bin\x64\{Configuration}\ -->
+  <PropertyGroup>
+    <NativeHookProject>$(MSBuildThisFileDirectory)..\eDIAN.Hook.Native\eDIAN.Hook.Native.vcxproj</NativeHookProject>
+    <NativeHookDllPath>$(TargetDir)eDIAN.Hook.Native.dll</NativeHookDllPath>
+  </PropertyGroup>
+  <Target Name="BuildNativeHookDll" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true'">
+    <MSBuild Projects="$(NativeHookProject)" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+  </Target>
+  <Target Name="AddNativeHookToContent" BeforeTargets="AssignTargetPaths;GetCopyToOutputDirectoryItems">
+    <ItemGroup>
+      <Content Include="$(NativeHookDllPath)" Condition="Exists('$(NativeHookDllPath)')">
+        <Link>eDIAN.Hook.Native.dll</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+  </Target>
 </Project>

@@ -152,15 +152,13 @@ flowchart TB
 
 - **목적**: ZWCAD 솔루션에 Hook/Native **소스만** 포함. `VfsInterceptor`는 **아직 주석**.
 - **주요 작업**:
-  - [ ] AutoCAD에서 복사: `eDIAN.Hook\` (`VfsInterceptor.cs`, `NativeMethods.cs` 등)
-  - [ ] AutoCAD에서 복사: `eDIAN.Hook.Native\` (vcxproj, `*.cpp`, `*.h`)
-  - [ ] `eDIAN.Hook.csproj` — **net48**로 신규 작성 (AutoCAD net8 csproj 복사 금지)
-  - [ ] `eDIAN Plus for ZWCAD 2026.sln`에 두 프로젝트 등록
-  - [ ] `.gitignore` — Native `x64/Release` 빌드 산출물 제외 확인
+  - [x] AutoCAD `e24afc9`에서 복사: `eDIAN.Hook\`, `eDIAN.Hook.Native\` (detours 포함)
+  - [x] `eDIAN.Hook.csproj` — **net48** 신규 (`UnmanagedCallersOnly` 제거)
+  - [x] `eDIAN Plus for ZWCAD 2026.sln`에 두 프로젝트 등록
 - **테스트 검증**:
-  - [ ] `eDIAN.Hook.Native` 단독 x64 Release 빌드
-  - [ ] `eDIAN.Hook` 단독 x64 Release 빌드
-- **상태**: _대기_
+  - [x] 솔루션 **Release \| x64** Rebuild 성공
+  - [x] `eDIAN.Main\bin\x64\Release\` — `eDIAN.Hook.dll`, `eDIAN.Hook.Native.dll` 확인
+- **상태**: **완료 (Completed)** — 2026-05-26
 
 ---
 
@@ -168,16 +166,14 @@ flowchart TB
 
 - **목적**: Main 빌드 시 Native DLL이 `bin\x64\{Configuration}\`에 자동 복사.
 - **주요 작업**:
-  - [ ] `eDIAN.Main.csproj` — `ProjectReference` → `eDIAN.Hook`
-  - [ ] AutoCAD Main과 동일 패턴의 MSBuild 타겟 이식:
-    - `BuildNativeHookDll` (`BeforeTargets="PrepareForBuild"`)
-    - `AddNativeHookToContent` → `$(TargetDir)eDIAN.Hook.Native.dll`
-  - [ ] 출력 경로가 **`bin\x64\`** 인지 확인 (`net8.0-windows` 하위 생성 없음)
+  - [x] `eDIAN.Main.csproj` — `ProjectReference` → `eDIAN.Hook`
+  - [x] `BuildNativeHookDll`, `AddNativeHookToContent` (출력 `bin\x64\$(Configuration)\`)
+  - [x] Native `OutDir` / `TargetName` — ZWCAD 경로 (`net8.0-windows` 없음)
 - **테스트 검증**:
-  - [ ] 전체 솔루션 **Rebuild \| x64 \| Debug/Release** (공식 MSBuild: `.cursor/rules/build_standard.mdc`)
-  - [ ] `eDIAN.Main\bin\x64\Release\`에 `eDIAN.Hook.dll`, `eDIAN.Hook.Native.dll` 존재
-  - [ ] ZWCAD 로드 시 **VFS 주석 유지** — Phase 1 회귀(팔레트·MIP·Service) 무영향
-- **상태**: _대기_
+  - [x] Release \| x64 Rebuild 성공
+  - [x] 출력 폴더에 Hook/Native DLL 존재
+  - [ ] ZWCAD 로드 — **VFS 주석 유지** Phase 1 회귀 (박부장)
+- **상태**: **빌드 완료** — ZWCAD 실기 확인 남음
 
 ---
 
@@ -185,11 +181,11 @@ flowchart TB
 
 - **목적**: 컴파일 의존성 정리. Install 활성화는 5단계와 분리 가능.
 - **주요 작업**:
-  - [ ] `PluginApplication.cs` — `using eDIAN.Hook;` 복구 (`Install`/`Uninstall`은 선택적으로 5단계까지 주석 유지)
-  - [ ] `ProtectionController.cs`, `MainForm.xaml.cs` — `using eDIAN.Hook;` 주석 해제 (AutoCAD와 동일, 직접 VFS 호출 없음)
+  - [x] `ProtectionController.cs`, `MainForm.xaml.cs` — `using eDIAN.Hook;`
+  - [x] `PluginApplication` — `VfsInterceptor.Install()` / `Uninstall()` **주석 유지**
 - **테스트 검증**:
-  - [ ] Release 빌드 성공
-- **상태**: _대기_
+  - [x] Release 빌드 성공
+- **상태**: **완료 (Completed)** — 2026-05-26
 
 ---
 
@@ -339,9 +335,9 @@ flowchart TB
 | 단계 | 완료일 | 비고 |
 |------|--------|------|
 | 0 착수 승인 | 2026-05-26 | `feature/phase2-vfs`, `PHASE2_KICKOFF_GATE.md`, **실기 회귀 완료** |
-| 1 소스 이관 | | |
-| 2 빌드 연동 | | |
-| 3 Managed 연결 | | |
+| 1 소스 이관 | 2026-05-26 | `feature/phase2-vfs` |
+| 2 빌드 연동 | 2026-05-26 | MSBuild OK, ZWCAD 로드 회귀 남음 |
+| 3 Managed 연결 | 2026-05-26 | VFS Install 비활성 |
 | 4 Setup | | |
 | 5 VFS 활성화 | | |
 | 6 실측·튜닝 | | |
@@ -366,4 +362,4 @@ flowchart TB
 ---
 
 **Last Updated**: 2026-05-26  
-**Status**: **0단계 완료** — `feature/phase2-vfs`에서 **1단계(소스 이관)** 진행 가능. Hook/Native 미이관, `VfsInterceptor` 비활성
+**Status**: **1~3단계 완료(빌드)** — `VfsInterceptor` 비활성. 다음: ZWCAD 로드 회귀 → 4 Setup → 5 VFS ON

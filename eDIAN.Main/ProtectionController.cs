@@ -20,7 +20,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using Action = Microsoft.InformationProtection.Policy.Actions.Action;
-// using eDIAN.Hook;
+using eDIAN.Hook;
 using CadApplication = ZwSoft.ZwCAD.ApplicationServices.Application;
 using Label = Microsoft.InformationProtection.Label;
 using eDIAN.Main.API;

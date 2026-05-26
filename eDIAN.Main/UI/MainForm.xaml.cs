@@ -2,7 +2,7 @@ using ZwSoft.ZwCAD.ApplicationServices;
 using ZwSoft.ZwCAD.DatabaseServices;
 using eDIAN.Core;
 using eDIAN.Data;
-// using eDIAN.Hook;
+using eDIAN.Hook;
 using eDIAN.Main.API;
 using eDIAN.Main.Core;
 using eDIAN.Main.Data;
