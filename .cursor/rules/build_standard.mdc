@@ -1,0 +1,61 @@
+---
+description: eDIAN Plus for ZWCAD 2026 공식 MSBuild 경로, net48 x64 빌드, Setup 출력 경로 주의사항
+alwaysApply: true
+---
+
+# eDIAN Plus for ZWCAD 2026 Build Standard
+
+본 문서는 **ZWCAD 솔루션**의 공식 빌드 환경입니다. AutoCAD 2026(net8) 빌드 규칙과 **혼용하지 않습니다**.
+
+## 1. 공식 빌더 (MSBuild)
+
+- **경로**: `C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\amd64\MSBuild.exe`
+
+## 2. 솔루션·플랫폼
+
+| 항목 | 값 |
+|------|-----|
+| 솔루션 | `eDIAN Plus for ZWCAD 2026.sln` |
+| TFM | **.NET Framework 4.8** (`TargetFrameworkVersion` v4.8) |
+| 플랫폼 | **x64** (`Platform="x64"`) |
+| Main 출력 (Release) | `eDIAN.Main\bin\x64\Release\` |
+| Setup 참조 경로 | `..\eDIAN.Main\bin\x64\Release\` (**`net8.0-windows` 없음**) |
+
+## 3. 공식 빌드 명령 (PowerShell)
+
+작업 디렉터리를 솔루션 루트로 둔 뒤 실행합니다 (경로에 공백 있음).
+
+```powershell
+cd "D:\workspace_vs\eDIAN Plus for ZWCAD 2026"
+
+# 전체 솔루션 리빌드 (Debug)
+& "C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\amd64\MSBuild.exe" /t:Rebuild /p:Configuration=Debug /p:Platform="x64" /m /v:m
+
+# 배포용 (Release) — Main 후 Setup
+& "C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\amd64\MSBuild.exe" /t:Rebuild /p:Configuration=Release /p:Platform="x64" /m /v:m
+```
+
+단일 프로젝트만 빌드할 때:
+
+```powershell
+& "C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\amd64\MSBuild.exe" "eDIAN.Main\eDIAN.Main.csproj" /t:Rebuild /p:Configuration=Release /p:Platform="x64" /v:m
+```
+
+## 4. 빌드 시 주의사항
+
+- **공백 경로**: CWD를 솔루션 루트로 두고 위 명령 사용 (솔루션 파일명 생략 가능).
+- **Hook.Native 없음**: Phase 1에는 `eDIAN.Hook.Native.dll` 선행 빌드 **불필요**. AutoCAD용 Native 복사 타겟을 csproj에 추가하지 않음.
+- **Setup**: Release Main 산출물이 `bin\x64\Release\`에 있어야 vdproj 패키징이 성공함.
+- **NuGet**: `packages.config` + `packages\` (PackageReference 일괄 전환 금지, 사용자 지시 없이).
+- **에디션**: Visual Studio 18 (Community).
+
+## 5. AutoCAD 2026 저장소와의 차이
+
+| | ZWCAD (본 repo) | AutoCAD 2026 |
+|--|-----------------|--------------|
+| TFM | net48 | net8.0-windows |
+| 출력 | `bin\x64\Release\` | `bin\x64\Release\net8.0-windows\` |
+| Native DLL | Phase 2까지 없음 | `eDIAN.Hook.Native` 포함 |
+
+---
+*최종 업데이트: 2026-05-26*

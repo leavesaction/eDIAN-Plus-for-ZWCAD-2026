@@ -1,0 +1,453 @@
+﻿<UserControl x:Class="eDIAN.Main.UI.ApplyLabelForm"             
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:eDIAN.Main.UI"
+             mc:Ignorable="d" d:DesignWidth="400">
+
+    <UserControl.Resources>
+
+        <!-- 체크박스를 이미지로 표시하는 스타일 -->
+
+        <Style x:Key="ImageCheckBoxStyle" TargetType="{x:Type CheckBox}">
+            <Setter Property="Foreground" Value="#FFF5F5F5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <BulletDecorator Background="Transparent">
+                            <BulletDecorator.Bullet>
+                                <Grid Width="16" Height="16">
+                                    <Image x:Name="ImgUnchecked" Source="/eDIAN;component/Resources/images/image_checkbox_unchecked.png" Stretch="Uniform" />
+                                    <Image x:Name="ImgChecked" Source="/eDIAN;component/Resources/images/image_checkbox_checked.png" Stretch="Uniform" Visibility="Collapsed" />
+                                </Grid>
+                            </BulletDecorator.Bullet>
+
+                            <ContentPresenter Margin="6,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                        </BulletDecorator>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="ImgUnchecked" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="ImgChecked" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        
+        <!-- 콤보 박스 Dark Style -->
+        <Style x:Key="DarkComboBoxStyle" TargetType="{x:Type ComboBox}">
+            <Setter Property="Foreground" Value="#FFF5F5F5"/>
+            <Setter Property="Background" Value="#FF1F262E"/>
+            <Setter Property="BorderBrush" Value="#FF7C838D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="MaxDropDownHeight" Value="280"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+
+            <!-- (기존 ItemContainerStyle 그대로) -->
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <Border x:Name="MainBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4"
+                            SnapsToDevicePixels="True">
+                                <DockPanel LastChildFill="True">
+                                    <!-- 드롭다운 버튼 영역 -->
+                                    <ToggleButton x:Name="ToggleButton"
+                                          DockPanel.Dock="Right"
+                                          Focusable="False"
+                                          Width="22"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Background="Transparent"
+                                          BorderThickness="0">
+                                        <Path Data="M 0 0 L 4 4 L 8 0 Z"
+                                      Fill="#FFF5F5F5"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+                                    </ToggleButton>
+
+                                    <ContentPresenter x:Name="ContentSite"
+                                              Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left"
+                                              RecognizesAccessKey="True"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"/>
+                                </DockPanel>
+                            </Border>
+
+                            <Popup x:Name="Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Fade"
+                                   Width="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
+                                <Border Background="#FF1F262E"
+                                    BorderBrush="#FF7C838D"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="1"
+                                    SnapsToDevicePixels="True">
+                                    <ScrollViewer Margin="0"
+                                          MaxHeight="{TemplateBinding MaxDropDownHeight}"        
+                                          SnapsToDevicePixels="True"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                                        <StackPanel IsItemsHost="True" />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <!-- 드롭다운 버튼: MouseOver 배경 -->
+                            <Trigger SourceName="ToggleButton" Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ToggleButton" Property="Background" Value="#FF2A3340"/>
+                            </Trigger>
+
+                            <!-- 드롭다운 버튼: 클릭(드롭다운 오픈 상태) 배경 -->
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="ToggleButton" Property="Background" Value="#FF3A4A63"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- DatePicker 다크 스타일-->
+        <Style x:Key="DarkDatePickerStyle" TargetType="{x:Type DatePicker}">
+            <Setter Property="Foreground" Value="#FFF5F5F5"/>
+            <Setter Property="Background" Value="#FF1F262E"/>
+            <Setter Property="BorderBrush" Value="#FF7C838D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Padding" Value="6,0"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DatePicker}">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="4"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 텍스트 입력 영역 -->
+                                <DatePickerTextBox Grid.Column="0" x:Name="PART_TextBox"
+                                        Background="Transparent"
+                                        Foreground="{TemplateBinding Foreground}"
+                                        BorderThickness="0"
+                                        Padding="{TemplateBinding Padding}"
+                                        VerticalContentAlignment="Center"
+                                        Focusable="{TemplateBinding Focusable}"/>
+
+                                <!-- 캘린더 버튼 -->
+                                <Button Grid.Column="2" x:Name="PART_Button"
+                                        Width="20"
+                                        Margin="0,0,2,0"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Cursor="Hand">
+                                    <Path Data="M 0 0 L 4 4 L 8 0 Z" Fill="#FFF5F5F5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Button>
+
+                                <!-- 캘린더 팝업 -->
+                                <Popup x:Name="PART_Popup" Grid.Column="0" Grid.ColumnSpan="3" StaysOpen="False" AllowsTransparency="True" Placement="Bottom">
+                                    <Border Background="#FF1F262E" BorderBrush="#FF7C838D" BorderThickness="1" CornerRadius="4" Padding="4">
+                                        <Calendar x:Name="PART_Calendar" Background="#FF1F262E" Foreground="#FFF5F5F5" BorderThickness="0"/>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <!-- DatePickerTextBox 스타일 통합 -->
+            <Style.Resources>
+                <Style TargetType="{x:Type DatePickerTextBox}">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="#FFF5F5F5"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type DatePickerTextBox}">
+                                <Grid>
+                                    <Border Width="80" Background="{TemplateBinding Background}" BorderThickness="0">
+                                        <ScrollViewer x:Name="PART_ContentHost" Margin="0" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Style.Resources>
+            
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35" />
+            <RowDefinition Height="44" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Title Bar -->
+        <Border Grid.Row="0" Width="400" Height="35" CornerRadius="6,6,0,0" Padding="12,0,12,0"  Background="#FF29313C" BorderThickness="1" BorderBrush="#FF4D5D78" MouseLeftButtonDown="onMouseLeftButtonDownTitleBar">
+            <TextBlock x:Name="TitleTextBlock" Text="레이블 지정" Foreground="#FFF5F5F5" VerticalAlignment="Center" FontSize="13" FontWeight="Bold" />
+        </Border>
+
+        <!-- 버튼 -->
+
+        <Border Grid.Row="1" Width="400" Height="44" Padding="12,0,12,0" VerticalAlignment="Center"  Background="#FF3B4453" BorderThickness="1,0,1,0" BorderBrush="#FF4D5D78">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="110" />
+                </Grid.ColumnDefinitions>
+
+                <!-- 레이블 선택 콤보박스 -->
+
+                <Grid Grid.Column="0" VerticalAlignment="Center">
+
+                    <Border HorizontalAlignment="Left">
+                        <ComboBox x:Name="ComboBoxSensitivityLabel" Width="200" Height="24" Background="#FF1F262E" Style="{StaticResource DarkComboBoxStyle}" SelectionChanged="onChangedSensitivityLabel"/>
+                    </Border>
+                </Grid>
+
+                <!-- 버튼-->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+
+                    <Button x:Name="ButtonApply" Background="Transparent" Width="50" Height="24" Padding="0" BorderThickness="0" Cursor="Hand" Click="onClickApplyButton">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Image x:Name="ImageApply" Source="/eDIAN;component/Resources/images/image_popup_apply_on.png" Width="50" Height="24" />
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ImageApply" Property="Source" Value="/eDIAN;component/Resources/images/image_popup_apply_over.png" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <TextBlock Width="5"/>
+                    <Button x:Name="ButtonCancel" Background="Transparent" Width="50" Height="24" Padding="0" BorderThickness="0" Cursor="Hand" Click="onClickCancelBotton">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Image x:Name="ImageCancel" Source="/eDIAN;component/Resources/images/image_popup_cancel_on.png" Width="50" Height="24" />
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ImageCancel" Property="Source" Value="/eDIAN;component/Resources/images/image_popup_cancel_over.png" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                </StackPanel>
+
+            </Grid>
+
+        </Border>
+
+        <!-- 사용자 정의 레이블 입력 폼 -->
+
+        <Border Width="400" Grid.Row="2" x:Name="CustomLabelForm" Padding="12,0,12,0"  Visibility="Visible" Loaded="loadForm" Background="#FF3B4453" BorderThickness="1,0,1,0" BorderBrush="#FF4D5D78">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+
+                <!-- 권한 체크 박스 -->
+                <Grid Grid.Row="0" Height="40">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0">
+                        <TextBlock x:Name="RightTextBlock" Text="권한" Margin="0,0,0,2" VerticalAlignment="Center" Foreground="#FFF5F5F5" FontSize="13" FontWeight="Bold"/>
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <CheckBox x:Name="ViewCheckBox" Tag="VIEW" VerticalAlignment="Center" Foreground="#FFF5F5F5" Style="{StaticResource ImageCheckBoxStyle}" IsChecked="True" IsEnabled="False">보기</CheckBox>
+                    </Grid>
+                    <Grid Grid.Column="2">
+                        <CheckBox x:Name="ExtractCheckBox" Tag="EXTRACT" VerticalAlignment="Center" Foreground="#FFF5F5F5" Style="{StaticResource ImageCheckBoxStyle}">보기</CheckBox>
+                    </Grid>
+                    <Grid Grid.Column="3">
+                        <CheckBox x:Name="PrintCheckBox" Tag="PRINT" VerticalAlignment="Center" Foreground="#FFF5F5F5" Style="{StaticResource ImageCheckBoxStyle}">보기</CheckBox>
+                    </Grid>
+                    <Grid Grid.Column="4">
+                        <CheckBox x:Name="EditCheckBox" Tag="EDIT" VerticalAlignment="Center" Foreground="#FFF5F5F5" Style="{StaticResource ImageCheckBoxStyle}">보기</CheckBox>
+                    </Grid>
+                    <Grid Grid.Column="5"></Grid>
+
+                </Grid>
+
+                <Grid Grid.Row="1" Height="30">
+
+                    <Border Height="24" CornerRadius="4" Padding="2" Background="#FF1F262E" BorderThickness="1" BorderBrush="#FF7C838D">
+                        <TextBox x:Name="SeekUserTextBox" Background="#FF1F262E"  BorderThickness="0"  Height="20" Foreground="#FFF5F5F5" VerticalContentAlignment="Center" FontSize="12" TextChanged="onChangedSeekUserByText"/>
+                    </Border>
+                    
+                </Grid>
+
+                <Grid Grid.Row="2">
+
+                    <Border CornerRadius="4" Margin="0,0,0,4" Padding="3" Background="#FF1F262E">
+
+                        <!-- 사용자 선택 리스트 박스 -->
+                        <ListBox x:Name="UserListBox" 
+                                Height="240"
+                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                HorizontalContentAlignment="Stretch" 
+                                Background="#FF1F262E" 
+                                BorderThickness="0" 
+                                d:ItemsSource="{d:SampleData}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate >
+
+                                    <Border Height="24">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="28" />
+                                                <ColumnDefinition Width="20" />
+                                                <ColumnDefinition Width="120" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Grid Grid.Column="0">
+                                                <CheckBox VerticalAlignment="Center" IsChecked="{Binding isChecked, Mode=TwoWay}" Style="{StaticResource ImageCheckBoxStyle}" />
+                                            </Grid>
+                                            <Grid Grid.Column="1">
+                                                <Image Source="{Binding IconLicenseType}" HorizontalAlignment="Left" Width="16" Height="16" />
+                                            </Grid>
+                                            <Grid Grid.Column="2">
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#FFF5F5F5" Text="{Binding userName}" />
+                                            </Grid>
+                                            <Grid Grid.Column="3">
+                                                <TextBlock Grid.Column="3" VerticalAlignment="Center" Foreground="#FFF5F5F5" Text="{Binding userId}" />
+                                            </Grid>
+
+                                        </Grid>
+                                    </Border>
+
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="3">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0">
+                        <CheckBox x:Name="IsApplyLimitDateTime" VerticalAlignment="Center" Foreground="#FFF5F5F5" Style="{StaticResource ImageCheckBoxStyle}" FontWeight="Bold" IsChecked="False" 
+                                  Unchecked="onClickLimitDateTimeCheckBox" Checked="onClickLimitDateTimeCheckBox">Expire-date</CheckBox>
+                    </Grid>
+
+                    <Grid Grid.Column="1">
+                                        
+                        <Border x:Name="LimitDateTimeForm" Visibility="Visible">
+
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Column="0">
+                                    <DatePicker x:Name="LimitDatePicker" Style="{StaticResource DarkDatePickerStyle}" SelectedDateFormat="Short"/>
+                                </Grid>
+
+                                <Grid Grid.Column="1">
+                                    <TextBlock Width="10" Foreground="#FFF5F5F5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <Grid Grid.Column="2">
+                                    <ComboBox x:Name="LimitHourComboBox" Width="50" Height="24" Style="{StaticResource DarkComboBoxStyle}" />
+                                </Grid>
+
+                                <Grid Grid.Column="3">
+                                    <Border Width="10" VerticalAlignment="Center">
+                                        <TextBlock Text=":" HorizontalAlignment="Center" Foreground="#FFF5F5F5"/>
+                                    </Border>
+                                </Grid>
+
+                                <Grid Grid.Column="4">
+                                    <ComboBox x:Name="LimitMinuteComboBox" Width="50" Height="24" Style="{StaticResource DarkComboBoxStyle}" />
+                                </Grid>
+
+                                <Grid Grid.Column="5"></Grid>
+
+                            </Grid>
+
+                        </Border>
+                    </Grid>
+                        
+                </Grid>
+
+            </Grid>
+
+        </Border>
+
+        <Border Grid.Row="3" Height="6" CornerRadius="0,0,6,6" Background="#FF3B4453" BorderThickness="1,0,1,1" BorderBrush="#FF4D5D78">
+            <TextBlock Height="6" />
+        </Border>
+
+    </Grid>
+
+</UserControl>

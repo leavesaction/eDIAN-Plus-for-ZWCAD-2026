@@ -1,0 +1,326 @@
+<global>
+
+	<group type="title">
+		<node id="apply">
+			<item lang="kor">적용</item>
+			<item lang="eng">Apply</item>
+		</node>
+		<node id="cancel">
+			<item lang="kor">취소</item>
+			<item lang="eng">Cancel</item>
+		</node>
+		<node id="view">
+			<item lang="kor">보기</item>
+			<item lang="eng">View</item>
+		</node>
+		<node id="copy">
+			<item lang="kor">복사</item>
+			<item lang="eng">Copy</item>
+		</node>
+		<node id="print">
+			<item lang="kor">출력</item>
+			<item lang="eng">Print</item>
+		</node>
+		<node id="save">
+			<item lang="kor">저장</item>
+			<item lang="eng">Save</item>
+		</node>
+		<node id="read.only">
+			<item lang="kor">읽기전용</item>
+			<item lang="eng">Read only</item>
+		</node>
+		<node id="open.document">
+			<item lang="kor">도면 열기</item>
+			<item lang="eng">Open File</item>
+		</node>
+		<node id="save.document">
+			<item lang="kor">도면 저장</item>
+			<item lang="eng">Save File</item>
+		</node>
+		<node id="document.type">
+			<item lang="kor">도면 파일 (*.dwg)|*.dwg|암호화된 도면 파일 (*.pdwg)|*.pdwg</item>
+			<item lang="eng">Document File (*.dwg)|*.dwg|Encrypted Document File (*.pdwg)|*.pdwg</item>
+		</node>
+		<node id="apply.label">
+			<item lang="kor">레이블 적용</item>
+			<item lang="eng">Apply Label</item>
+		</node>
+		<node id="right">
+			<item lang="kor">권한</item>
+			<item lang="eng">Rights</item>
+		</node>
+		<node id="apply.justification">
+			<item lang="kor">정당성 입력</item>
+			<item lang="eng">Apply Justification</item>
+		</node>
+		<node id="title.setting">
+			<item lang="kor">설정</item>
+			<item lang="eng">Setting</item>
+		</node>
+		<node id="label.owner">
+			<item lang="kor">레이블 소유자</item>
+			<item lang="eng">Owner of Label</item>
+		</node>
+		<node id="label.user">
+			<item lang="kor">레이블 사용자</item>
+			<item lang="eng">User of Label</item>
+		</node>
+
+		<node id="enable.view">
+			<item lang="kor">보기 가능</item>
+			<item lang="eng">enalble view</item>
+		</node>
+		<node id="enable.copy">
+			<item lang="kor">복사 가능</item>
+			<item lang="eng">enalble copy</item>
+		</node>
+		<node id="enable.print">
+			<item lang="kor">출력 가능</item>
+			<item lang="eng">enalble print</item>
+		</node>
+		<node id="enable.save">
+			<item lang="kor">저장 가능</item>
+			<item lang="eng">enalble save</item>
+		</node>
+		<node id="disable.view">
+			<item lang="kor">보기 불가</item>
+			<item lang="eng">disable view</item>
+		</node>
+		<node id="disable.copy">
+			<item lang="kor">복사 불가</item>
+			<item lang="eng">disable copy</item>
+		</node>
+		<node id="disable.print">
+			<item lang="kor">출력 불가</item>
+			<item lang="eng">disable print</item>
+		</node>
+		<node id="disable.save">
+			<item lang="kor">저장 불가</item>
+			<item lang="eng">disable save</item>
+		</node>
+		<node id="apply.expire.datetime">
+			<item lang="kor">만료 일시 적용</item>
+			<item lang="eng">Expire date</item>
+		</node>
+	</group>
+
+	<group type="message">
+		<node id="select.sensitivity.label" kind="Warning">
+			<item lang="kor">민감도 레이블을 선택하세요.</item>
+			<item lang="eng">Select a sensitivity label.</item>
+		</node>
+		<node id="success.apply.label" kind="Info">
+			<item lang="kor">레이블이 정상적으로 적용되었습니다.</item>
+			<item lang="eng">The label was applied successfully.</item>
+		</node>
+		<node id="error.service.server" kind="Warning">
+			<item lang="kor">서비스 서버가 생성되지 않았습니다.	서비스 서버 실행환경을 확인하세요.</item>
+			<item lang="eng">The service server was not created. Please check the service server environment.</item>
+		</node>
+		<node id="error.mip.connect" kind="Error">
+			<item lang="kor">MIP 초기화 중 네트워크 연결에 문제가 발생 했습니다.</item>
+			<item lang="eng">A problem occurred with the network connection during MIP initialization.</item>
+		</node>		
+		<node id="error.mip.initialize" kind="Error">
+			<item lang="kor">MIP 초기화 중 오류가 발생했습니다.</item>
+			<item lang="eng">An error occurred during MIP initialization.</item>
+		</node>
+		<node id="error.mip.auth.connect" kind="Error">
+			<item lang="kor">MIP 사용자 정보 조회 중 네트워크 오류가 발생했습니다.\n네트워크 연결 상태를 확인한 후 다시 시도해 주세요.</item>
+			<item lang="eng">A network error occurred while retrieving MIP user information.\nPlease check your network connection and try again.</item>
+		</node>
+		<node id="error.mip.user.search" kind="Warning">
+			<item lang="kor">MIP 사용자 정보 조회 중 오류가 발생했습니다.\n관리자에게 문의해 주세요.</item>
+			<item lang="eng">An error occurred while retrieving MIP user information.\nPlease contact your administrator.</item>
+		</node>
+		<node id="error.mip.user.response.format" kind="Error">
+			<item lang="kor">MIP 사용자 정보 응답 형식이 올바르지 않습니다.\n관리자에게 문의해 주세요.</item>
+			<item lang="eng">The MIP user information response format is incorrect.\nPlease contact your administrator.</item>
+		</node>
+		<node id="error.mip.user.response.parse" kind="Error">
+			<item lang="kor">MIP 사용자 정보 응답(JSON) 파싱 중 오류가 발생했습니다.\n관리자에게 문의해 주세요.</item>
+			<item lang="eng">An error occurred while parsing the MIP user information response (JSON).\nPlease contact your administrator.</item>
+		</node>
+		<node id="error.mip.user.response.missing" kind="Warning">
+			<item lang="kor">MIP 사용자 정보에 계정 정보가 없습니다.\n관리자에게 문의해 주세요.</item>
+			<item lang="eng">MIP user information is missing account details.\nPlease contact your administrator.</item>
+		</node>
+		<node id="user.auth.need" kind="Info">
+			<item lang="kor">로그인 후 사용 가능합니다.</item>
+			<item lang="eng">You need to log in to use this feature.</item>
+		</node>
+		<node id="file.not.found" kind="Warning">
+			<item lang="kor">파일경로에 해당하는 파일이 존재하지 않습니다.</item>
+			<item lang="eng">The file corresponding to the file path does not exist.</item>
+		</node>
+		<node id="file.already.open" kind="Warning">
+			<item lang="kor">선택한 파일은 이미 열려 있습니다.</item>
+			<item lang="eng">The selected file is already open.</item>
+		</node>
+		<node id="document.cannot.open" kind="Warning">
+			<item lang="kor">도면 파일을 열 수 없습니다.</item>
+			<item lang="eng">Cannot open the drawing file.</item>
+		</node>
+		<node id="error.network.connection" kind="Error">
+			<item lang="kor">네트워크 연결에 문제가 발생했습니다. 다시 시도하세요.</item>
+			<item lang="eng">A problem occurred with the network connection. Please try again.</item>
+		</node>
+		<node id="error.document.open" kind="Warning">
+			<item lang="kor">도면 파일을 여는 중 오류가 발생했습니다. 다시 시도 하세요.</item>
+			<item lang="eng">An error occurred while opening the drawing file. Please try again.</item>
+		</node>
+		<node id="justification.required" kind="Warning">
+			<item lang="kor">정당성 사유를 입력하세요.</item>
+			<item lang="eng">Please enter a justification.</item>
+		</node>
+		<node id="label.id.not.set" kind="Warning">
+			<item lang="kor">레이블 ID가 설정되지 않았습니다.</item>
+			<item lang="eng">Label ID is not set.</item>
+		</node>
+		<node id="file.name.not.set" kind="Warning">
+			<item lang="kor">파일 이름이 설정되지 않았습니다.</item>
+			<item lang="eng">File name is not set.</item>
+		</node>
+		<node id="document.info.not.set" kind="Warning">
+			<item lang="kor">문서 정보가 설정되지 않았습니다.</item>
+			<item lang="eng">Document information is not set.</item>
+		</node>
+		<node id="user.list.not.set" kind="Warning">
+			<item lang="kor">권한 부여 대상자가 선택되지 않았습니다.</item>
+			<item lang="eng">No users selected for permission assignment.</item>
+		</node>
+		<node id="right.list.not.set" kind="Warning">
+			<item lang="kor">부여할 권한이 선택되지 않았습니다.</item>
+			<item lang="eng">No permissions selected for assignment.</item>
+		</node>
+		<node id="document.info.not.set" kind="Warning">
+			<item lang="kor">문서 정보가 설정되지 않았습니다.</item>
+			<item lang="eng">Document information is not set.</item>
+		</node>
+		<node id="service.server.wait" kind="Warning">
+			<item lang="kor">서비스 서버에 접속 중입니다. 잠시 후 다시 실행해 주세요.</item>
+			<item lang="eng">Connecting to the service server. Please try again later.</item>
+		</node>
+		<node id="file.save.first" kind="Warning">
+			<item lang="kor">파일을 먼저 저장하세요.</item>
+			<item lang="eng">Please save the file first.</item>
+		</node>
+		<node id="protected.document.changed" kind="Warning">
+			<item lang="kor">보호된 도면이 변경되었습니다. 먼저 변경내용을 저장하세요.</item>
+			<item lang="eng">The protected drawing has been modified. Please save the changes first.</item>
+		</node>
+		<node id="need.auth" kind="Error">
+			<item lang="kor">수행 권한이 없습니다.</item>
+			<item lang="eng">You do not have permission to perform.</item>
+		</node>
+		<node id="file.in.use" kind="Warning">
+			<item lang="kor">해당 도면이 사용되고 있습니다.</item>
+			<item lang="eng">The drawing in question is being used.</item>
+		</node>
+		<node id="file.in.use.delayed" kind="Warning">
+			<item lang="kor">해당 도면에 대한 리소스 해제가 지연되고 있습니다. 다시 시도해 주세요.</item>
+			<item lang="eng">The release of resources for the drawing is delayed. Please try again.</item>
+		</node>
+		<node id="document.info.not.set" kind="Warning">
+			<item lang="kor">문서 정보가 설정되지 않았습니다.</item>
+			<item lang="eng">Document information is not set.</item>
+		</node>
+		<node id="file.label.not.set" kind="Warning">
+			<item lang="kor">파일 정보가 없거나 레이블 ID가 비어 있습니다.</item>
+			<item lang="eng">File information is missing or the label ID is empty.</item>
+		</node>
+		<node id="cancel.label.not.justification" kind="Warning">
+			<item lang="kor">정당성 사유가 입력되지 않아 레이블 적용이 취소되었습니다.</item>
+			<item lang="eng">Label application was canceled because no justification was entered.</item>
+		</node>
+		<node id="error.unauthorized.access" kind="Error">
+			<item lang="kor">파일에 대한 인증된 접근이 아닙니다.</item>
+			<item lang="eng">Unauthorized access to the file.</item>
+		</node>
+		<node id="error.no.permissions" kind="Error">
+			<item lang="kor">파일에 대한 권한이 없습니다.</item>
+			<item lang="eng">You do not have permission to access the file.</item>
+		</node>
+		<node id="error.file.access.denied" kind="Error">
+			<item lang="kor">파일에 대한 액세스가 거부되었습니다.</item>
+			<item lang="eng">Access to the file is denied.</item>
+		</node>
+		<node id="error.unexpected" kind="Error">
+			<item lang="kor">예상치 못한 오류가 발생했습니다.</item>
+			<item lang="eng">An unexpected error occurred.</item>
+		</node>
+		<node id="error.apply.label" kind="Warning">
+			<item lang="kor">레이블 적용 중 오류가 발생했습니다.</item>
+			<item lang="eng">An error occurred while applying the label.</item>
+		</node>
+		<node id="error.deny.security" kind="Warning">
+			<item lang="kor">보안 오류로 인해 접속 인증을 할 수 없습니다.</item>
+			<item lang="eng">Connection authentication is not possible due to a security error.</item>
+		</node>
+		<node id="error.deny.mip" kind="Warning">
+			<item lang="kor">MIP 서비스에 접근이 거부되었습니다.</item>
+			<item lang="eng">Access to the MIP service is denied.</item>
+		</node>
+		<node id="error.mip.auth.unexpected" kind="Warning">
+			<item lang="kor">MIP 권한 확인 중 예상치 못한 오류가 발생했습니다.</item>
+			<item lang="eng">An unexpected error occurred while checking MIP permissions.</item>
+		</node>
+		<node id="error.unsaved.documents" kind="Warning">
+			<item lang="kor">변경된 문서가 있습니다. 저장 한 후 종료해 주시기 바랍니다.</item>
+			<item lang="eng">There are unsaved changes. Please save the document before exiting.</item>
+		</node>
+		<node id="error.modified.documents" kind="Warning">
+			<item lang="kor">문서 내용이 변경되었습니다. 먼저 저장해 주시기 바랍니다.</item>
+			<item lang="eng">The document has been modified. Please save it first.</item>
+		</node>
+		<node id="error.saveas.protected.document" kind="Warning">
+			<item lang="kor">암호화된 문서는 다른 이름으로 저장할 수 없습니다.</item>
+			<item lang="eng">Encrypted documents cannot be saved with a different name.</item>
+		</node>
+		<node id="error.deny.save.document" kind="Warning">
+			<item lang="kor">해당 도면을 저장할 수 있는 권한이 없습니다.</item>
+			<item lang="eng">You do not have permission to save the document.</item>
+		</node>
+		<node id="error.deny.publish.document" kind="Warning">
+			<item lang="kor">해당 도면을 공유할 수 있는 권한이 없습니다.</item>
+			<item lang="eng">You do not have permission to publish the document.</item>
+		</node>
+		<node id="error.deny.copy.document" kind="Warning">
+			<item lang="kor">해당 도면의 요소를 복사할 수 있는 권한이 없습니다.</item>
+			<item lang="eng">You do not have permission to copy elements from the document.</item>
+		</node>
+		<node id="error.deny.print.document" kind="Warning">
+			<item lang="kor">해당 도면을 출력할 수 있는 권한이 없습니다.</item>
+			<item lang="eng">You do not have permission to print the document.</item>
+		</node>
+		<node id="confirm.file.already.open" kind="Question" title="open.document">
+			<item lang="kor">선택한 파일은 이미 열려 있습니다. 읽기 전용으로 열겠습니까?</item>
+			<item lang="eng">The selected file is already open. Do you want to open it as read-only?</item>
+		</node>
+		<node id="confirm.save.document" kind="Question" title="save.document">
+			<item lang="kor">파일을 저장하시겠습니까?</item>
+			<item lang="eng">Do you want to save the file?</item>
+		</node>
+		<node id="enter.justification.reason" kind="Warning">
+			<item lang="kor">레이블 하향 적용에 대한 사유를 입력하세요.</item>
+			<item lang="eng">Please enter the reason for the label downgrade.</item>
+		</node>
+		<node id="seek.user.info" kind="Info">
+			<item lang="kor">사용자 검색은 이름 또는 아이디로 가능합니다.</item>
+			<item lang="eng">User search is available by name or ID.</item>
+		</node>
+		<node id="enter.expire.datetime" kind="Warning">
+			<item lang="kor">만료 일시를 입력하세요.</item>
+			<item lang="eng">Please enter the expiration date and time.</item>
+		</node>
+		<node id="invalid.datetime.format" kind="Warning">
+			<item lang="kor">잘못된 날짜 형식입니다.</item>
+			<item lang="eng">Invalid date format.</item>
+		</node>
+		<node id="invalid.datetime.value" kind="Warning">
+			<item lang="kor">만료 일시는 현재 시간 이후여야 합니다.</item>
+			<item lang="eng">The expiration date must be after the current time.</item>
+		</node>
+	</group>
+
+</global>	
