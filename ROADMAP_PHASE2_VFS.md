@@ -139,12 +139,12 @@ flowchart TB
 
 - **목적**: 이관 원본·승인 범위·실측 환경 확정.
 - **주요 작업**:
-  - [ ] 박부장 승인: Hook/Native 추가, Setup DLL 변경, VFS 활성화 시점
-  - [ ] AutoCAD repo **baseline 커밋 해시** 기록 (예: `ROADMAP_PLUGIN_BASELINE` §4 태그 `acad-plugin-baseline-for-zwcad` 또는 동등 커밋)
-  - [ ] ZWCAD 실측 PC: 버전(2026 빌드), Plot/Publish 사용 시나리오 목록
-  - [ ] Git 브랜치: `feature/phase2-vfs` (또는 팀 규칙에 따른 명명)
-- **산출물**: 본 문서 §10 «이관 원본 기록» 표 작성
-- **상태**: _대기_
+  - [x] 박부장 승인: **1~3단계**(Hook/Native·빌드·using, VFS 비활성). **4~5단계**(Setup·VFS ON)는 단계별 재확인 — [`PHASE2_KICKOFF_GATE.md`](./PHASE2_KICKOFF_GATE.md)
+  - [x] AutoCAD repo **baseline 커밋 해시** 기록 — `e24afc9` (Hook/Native = `main` HEAD)
+  - [x] ZWCAD 실측 PC: `ZWCAD.exe` **26.11.0.20039**, `C:\Program Files\ZWSOFT\ZWCAD 2026\` — Plot/Publish 시나리오는 §6 실측 시 수행
+  - [x] Git 브랜치: `feature/phase2-vfs`
+- **산출물**: §10 기록 + `PHASE2_KICKOFF_GATE.md`
+- **상태**: **완료 (Completed)** — 2026-05-26
 
 ---
 
@@ -328,14 +328,17 @@ flowchart TB
 | 항목 | 값 |
 |------|-----|
 | 저장소 | `https://github.com/leavesaction/eDIAN-Plus-for-AutoCAD-2026` |
-| baseline 커밋/태그 | _이관 착수 시 기록_ |
+| **Hook/Native baseline** | `e24afc9538df433d65d9fa62f64a87eebd6c3324` (`e24afc9`) — 2026-05-22, `Finish edian+ for AutoCAD 2026` |
+| Managed Phase 1 포팅 기준 | 동일 `e24afc9` (`ROADMAP_PLUGIN_BASELINE.md` §5) |
+| Native VFS 코어 참고 커밋 | `dd532eeb` — 2026-05-20, `VfsEngine.cpp` 모듈화 |
 | Hook/Native 경로 | `eDIAN.Hook\`, `eDIAN.Hook.Native\` |
+| 착수 게이트 | [`PHASE2_KICKOFF_GATE.md`](./PHASE2_KICKOFF_GATE.md) |
 
 ### 10.2 Phase 2 완료 내역
 
 | 단계 | 완료일 | 비고 |
 |------|--------|------|
-| 0 착수 승인 | | |
+| 0 착수 승인 | 2026-05-26 | `feature/phase2-vfs`, `PHASE2_KICKOFF_GATE.md` |
 | 1 소스 이관 | | |
 | 2 빌드 연동 | | |
 | 3 Managed 연결 | | |
@@ -363,4 +366,4 @@ flowchart TB
 ---
 
 **Last Updated**: 2026-05-26  
-**Status**: **Phase 2 대기** — Phase 1 완료, Hook/Native 미이관, `VfsInterceptor` 비활성
+**Status**: **0단계 완료** — `feature/phase2-vfs`에서 **1단계(소스 이관)** 진행 가능. Hook/Native 미이관, `VfsInterceptor` 비활성
