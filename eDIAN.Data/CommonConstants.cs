@@ -110,7 +110,7 @@ namespace eDIAN.Data
 
             // 파일 보안 적용 관련 상수 초기화 
 
-            IS_FILE_ACL = true;
+            IS_FILE_ACL = false;
 
             // MIP 관련 상수 초기화 
 
