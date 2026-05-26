@@ -304,8 +304,9 @@
     <NativeHookProject>$(MSBuildThisFileDirectory)..\eDIAN.Hook.Native\eDIAN.Hook.Native.vcxproj</NativeHookProject>
     <NativeHookDllPath>$(TargetDir)eDIAN.Hook.Native.dll</NativeHookDllPath>
   </PropertyGroup>
-  <Target Name="BuildNativeHookDll" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true'">
-    <MSBuild Projects="$(NativeHookProject)" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+  <!-- 솔루션 빌드 시 Native는 sln에서 1회만 빌드. Main.csproj 단독 빌드 시에만 선행 빌드 -->
+  <Target Name="BuildNativeHookDll" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' And '$(BuildingSolutionFile)' != 'true'">
+    <MSBuild Projects="$(NativeHookProject)" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);BuildProjectReferences=false" />
   </Target>
   <Target Name="AddNativeHookToContent" BeforeTargets="AssignTargetPaths;GetCopyToOutputDirectoryItems">
     <ItemGroup>
