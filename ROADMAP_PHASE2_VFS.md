@@ -61,9 +61,9 @@
 |------|------|
 | 솔루션 프로젝트 | Main, Data, Core, Service, Service.Core, Setup — **Hook/Native 없음** |
 | `PARENT_PROGRAM_VERSION` | `"ZWCAD 2026"` (`CommonConstants.cs`) → `HookConstants.IsZWCAD()` **true** |
-| `VfsInterceptor` | `PluginApplication.Initialize()` 내 **주석 처리** |
+| `VfsInterceptor` | `PluginApplication` — **Install / Uninstall 활성** (5단계, 2026-05-26) |
 | `eDIAN.Hook` using | `ProtectionController`, `MainForm` 등 **주석** |
-| Setup | `eDIAN.Hook.Native.dll` **미포함** |
+| Setup | `eDIAN.Hook.dll`, `eDIAN.Hook.Native.dll` — `bin\x64\Release` 경로로 **추가**(4단계) |
 | 실측 | MIP·팔레트·Service — **가상화 없이** 동작 확인 (2026-05-26) |
 
 ### 2.1 ZWCAD에 이미 준비된 설정 (`HookConstants.cs`)
@@ -168,13 +168,13 @@ flowchart TB
 - **주요 작업**:
   - [x] `eDIAN.Main.csproj` — `ProjectReference` → `eDIAN.Hook`
   - [x] `BuildNativeHookDll`, `AddNativeHookToContent` (출력 `bin\x64\$(Configuration)\`)
-  - [x] Native `OutDir` / `TargetName` — ZWCAD 경로 (`net8.0-windows` 없음)
+  - [x] Native `OutDir` → `eDIAN.Hook.Native\bin\x64\{Configuration}\` + PostBuild/Main Copy (Main Clean 시 DLL 소실 방지)
 - **테스트 검증**:
   - [x] Release \| x64 Rebuild 성공
   - [x] **Debug \| x64** 솔루션 Rebuild 성공 (박부장, 2026-05-26) — Native **1회** 빌드
   - [x] 출력 폴더에 Hook/Native DLL 존재
-  - [ ] ZWCAD 로드 — **VFS 주석 유지** Phase 1 회귀 (박부장)
-- **상태**: **빌드 완료** — ZWCAD 실기 로드 회귀 남음
+  - [x] ZWCAD 로드 — **VFS 주석 유지** Phase 1 회귀 (박부장, 2026-05-26)
+- **상태**: **완료 (Completed)** — 2026-05-26
 
 ---
 
@@ -194,15 +194,16 @@ flowchart TB
 
 - **목적**: MSI에 Hook/Native DLL 포함. **ZWSOFT 레지스트리·경로는 변경하지 않음**.
 - **주요 작업**:
-  - [ ] `eDIAN.Setup.vdproj`에 파일 추가:
+  - [x] `eDIAN.Setup.vdproj`에 파일 추가:
     - `eDIAN.Hook.dll`
     - `eDIAN.Hook.Native.dll`
-  - [ ] `SourcePath`: `..\eDIAN.Main\bin\x64\Release\` ( **`net8.0-windows` 없음** )
-  - [ ] Release Main 빌드 후 Setup 빌드 → `Release\eDIAN.Setup.msi`
+  - [x] `SourcePath`: `..\eDIAN.Main\bin\x64\Release\` ( **`net8.0-windows` 없음** )
+  - [x] Release Main 빌드 후 Setup 빌드 → `eDIAN.Setup\Release\eDIAN.Setup.msi` (박부장, 2026-05-26 — 8 성공)
 - **테스트 검증**:
-  - [ ] MSI 설치 후 플러그인 디렉터리에 두 DLL 존재
-  - [ ] ZWCAD 레지스트리 로드 경로 회귀 없음
-- **상태**: _대기_
+  - [x] MSI 설치 후 플러그인 디렉터리에 `eDIAN.Hook.dll`, `eDIAN.Hook.Native.dll` 존재 (박부장, 2026-05-26)
+  - [x] ZWCAD 레지스트리 로드 경로 회귀 없음 — `HKCU\...\Applications\eDIAN Plus for ZWCAD 2026` · `LOADER`→`eDIAN.dll` · 자동 로드 정상 (박부장, 2026-05-26)
+- **비고**: `eDIAN.Hook.dll` 중복 패키징 WARNING(의존성+수동 항목) — 동작에는 문제 없음, 정리는 선택
+- **상태**: **완료 (Completed)** — MSI 빌드·설치 실측 완료 (2026-05-26)
 
 ---
 
@@ -210,13 +211,15 @@ flowchart TB
 
 - **목적**: 런타임에 PhantomVfs 엔진 가동.
 - **주요 작업**:
-  - [ ] `PluginApplication.Initialize()` — `VfsInterceptor.Install();` 주석 해제
-  - [ ] `Terminate()` — `VfsInterceptor.Uninstall();` 주석 해제
-  - [ ] Debug 빌드로 ZWCAD 기동
+  - [x] `PluginApplication.Initialize()` — `VfsInterceptor.Install();` 주석 해제
+  - [x] `Terminate()` — `VfsInterceptor.Uninstall();` 주석 해제
+  - [x] Debug 빌드로 ZWCAD 기동 (박부장, 2026-05-26)
 - **테스트 검증** (로그):
-  - [ ] `eDIAN.Main\bin\x64\Debug\logs\plugin.log` — `[VFS 3.0] Pure Memory Shield Engine Active.`
-  - [ ] Native/VFS 로그 — 세션 난수 폴더 생성, `Process: ZWCAD.exe`, ZWCAD config 주입 확인
-- **상태**: _대기_
+  - [x] `plugin.log` — `Initialize called` / `completed` (16:16:59 세션)
+  - [~] `plugin.log`의 `[VFS 3.0] Pure Memory Shield Engine Active.` — **미출력** (`VfsInterceptor`가 기본 log4net 리포지토리 사용, `PluginLogger`와 분리). **Native 로그로 Install 성공 판정**
+  - [x] `vfs_console_{PID}.log` — `Process: ZWCAD.exe`, 동적 세션 샌드박스(`glvpj16rci`), DWG/DWL/`*.zw$` 고스트·커밋, 종료 시 `[Vaporize]` 세션 소거 (PID 5616, 16:17~16:20)
+- **비고 (6단계)**: `CloseHandle` `0xC0000008` 반복 — 대용량 DWG·PDF보내기 구간; 크래시 없으면 튜닝 백로그
+- **상태**: **완료 (Completed)** — 5단계 실측·로그 OK (2026-05-26)
 
 ---
 
@@ -339,8 +342,8 @@ flowchart TB
 | 1 소스 이관 | 2026-05-26 | `feature/phase2-vfs` |
 | 2 빌드 연동 | 2026-05-26 | Debug/Release MSBuild OK (박부장 확인) |
 | 3 Managed 연결 | 2026-05-26 | VFS Install 비활성 |
-| 4 Setup | | |
-| 5 VFS 활성화 | | |
+| 4 Setup | 2026-05-26 | MSI 빌드·설치·레지스트리·Hook DLL 실측 완료 |
+| 5 VFS 활성화 | 2026-05-26 | ZWCAD Debug 기동·`vfs_console` ZWCAD.exe·Vaporize 확인 |
 | 6 실측·튜닝 | | |
 | 7 Baseline 고정 | | |
 
@@ -363,4 +366,4 @@ flowchart TB
 ---
 
 **Last Updated**: 2026-05-26  
-**Status**: **1~3단계 완료(빌드)** — `VfsInterceptor` 비활성. 다음: ZWCAD 로드 회귀 → 4 Setup → 5 VFS ON
+**Status**: **5단계 완료** — **6단계** Plot/Publish·Procmon·`HookConstants` 실측

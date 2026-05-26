@@ -299,11 +299,16 @@
   </Target>
   <Import Project="..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets" Condition="Exists('..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" />
   <Import Project="..\packages\Microsoft.InformationProtection.File.1.18.103\build\net48\Microsoft.InformationProtection.File.targets" Condition="Exists('..\packages\Microsoft.InformationProtection.File.1.18.103\build\net48\Microsoft.InformationProtection.File.targets')" />
-  <!-- Native DLL: eDIAN.Hook.Native.vcxproj OutDir → Main\bin\x64\{Configuration}\ (솔루션에서 Native 1회 빌드) -->
+  <!-- Native: vcxproj는 eDIAN.Hook.Native\bin\x64\{Configuration}\ 에 빌드 후 Main 출력으로 복사 (Main Clean이 공유 OutDir에서 DLL 삭제하는 문제 방지) -->
   <PropertyGroup>
+    <NativeHookDllSource>$(ProjectDir)..\eDIAN.Hook.Native\bin\x64\$(Configuration)\eDIAN.Hook.Native.dll</NativeHookDllSource>
     <NativeHookDllPath>$(TargetDir)eDIAN.Hook.Native.dll</NativeHookDllPath>
   </PropertyGroup>
-  <Target Name="AddNativeHookToContent" BeforeTargets="AssignTargetPaths;GetCopyToOutputDirectoryItems">
+  <Target Name="CopyNativeHookDllToOutput" AfterTargets="Build">
+    <Copy SourceFiles="$(NativeHookDllSource)" DestinationFiles="$(NativeHookDllPath)" SkipUnchangedFiles="true" Condition="Exists('$(NativeHookDllSource)')" />
+    <Warning Text="eDIAN.Hook.Native.dll not found at $(NativeHookDllSource). Build eDIAN.Hook.Native (Release|x64) first." Condition="!Exists('$(NativeHookDllSource)')" />
+  </Target>
+  <Target Name="AddNativeHookToContent" BeforeTargets="AssignTargetPaths;GetCopyToOutputDirectoryItems" DependsOnTargets="CopyNativeHookDllToOutput">
     <ItemGroup>
       <Content Include="$(NativeHookDllPath)" Condition="Exists('$(NativeHookDllPath)')">
         <Link>eDIAN.Hook.Native.dll</Link>

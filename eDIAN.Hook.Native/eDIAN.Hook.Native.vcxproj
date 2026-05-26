@@ -42,14 +42,17 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(ProjectDir)..\eDIAN.Main\bin\x64\$(Configuration)\</OutDir>
+    <!-- Main과 OutDir 공유 시 Main Rebuild Clean이 Native DLL을 삭제함 → 프로젝트 로컬 출력 후 PostBuild 복사 -->
+    <OutDir>$(ProjectDir)bin\x64\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\obj\</IntDir>
     <TargetName>eDIAN.Hook.Native</TargetName>
+    <MainPluginOutDir>$(ProjectDir)..\eDIAN.Main\bin\x64\$(Configuration)\</MainPluginOutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(ProjectDir)..\eDIAN.Main\bin\x64\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)bin\x64\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\obj\</IntDir>
     <TargetName>eDIAN.Hook.Native</TargetName>
+    <MainPluginOutDir>$(ProjectDir)..\eDIAN.Main\bin\x64\$(Configuration)\</MainPluginOutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -67,6 +70,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist "$(MainPluginOutDir)" mkdir "$(MainPluginOutDir)"
+xcopy /Y /D "$(TargetPath)" "$(MainPluginOutDir)"
+if exist "$(TargetDir)$(TargetName).pdb" xcopy /Y /D "$(TargetDir)$(TargetName).pdb" "$(MainPluginOutDir)"</Command>
+      <Message>Copy Native hook DLL to eDIAN.Main output</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -88,6 +97,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist "$(MainPluginOutDir)" mkdir "$(MainPluginOutDir)"
+xcopy /Y /D "$(TargetPath)" "$(MainPluginOutDir)"
+if exist "$(TargetDir)$(TargetName).pdb" xcopy /Y /D "$(TargetDir)$(TargetName).pdb" "$(MainPluginOutDir)"</Command>
+      <Message>Copy Native hook DLL to eDIAN.Main output</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DetoursInterceptor.h" />

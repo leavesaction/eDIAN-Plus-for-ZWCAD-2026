@@ -14,8 +14,8 @@
 | 구분 | 단계 | 승인 | 비고 |
 |------|------|------|------|
 | **즉시 진행** | 1~3 | **승인** | Hook/Native 소스·솔루션 등록, net48 빌드 연동, `using` 정리 — **`VfsInterceptor` 비활성 유지** |
-| **단계별 재확인** | 4 | 보류 | `eDIAN.Setup.vdproj` Hook/Native DLL 추가 |
-| **단계별 재확인** | 5 | 보류 | `VfsInterceptor.Install()` / `Uninstall()` 활성화 |
+| **단계별 재확인** | 4 | **완료** | MSI 설치·Hook DLL·ZWCAD 레지스트리 LOADER 회귀 없음 (2026-05-26) |
+| **단계별 재확인** | 5 | **완료** | VFS ON·ZWCAD Debug 기동·`vfs_console` ZWCAD.exe 확인 (2026-05-26) |
 | **사용자 실측** | 6~7 | 박부장 | ZWCAD Plot/Publish·세션 소거·`HookConstants` 보정 |
 
 ---
@@ -93,8 +93,8 @@ cd "D:\workspace_vs\eDIAN Plus for ZWCAD 2026"
 
 ## 6. 다음 작업
 
-**로드맵 1단계** — AutoCAD `e24afc9` 기준 `eDIAN.Hook` / `eDIAN.Hook.Native` 복사, net48 `eDIAN.Hook.csproj`, sln 등록 (`VfsInterceptor` 주석 유지).
+**다음** — 로드맵 **6단계**: Plot/Publish Procmon, `HookConstants` ZWCAD 프로필, 세션 폴더 소거.
 
 ---
 
-*Gate closed for step 0 (실기 회귀 포함) — ready for step 1 on branch `feature/phase2-vfs`.*
+*Gate: 0~4 완료, 5단계 VFS ON 코드 반영 (2026-05-26). 브랜치 `feature/phase2-vfs`.*

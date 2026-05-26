@@ -19,14 +19,14 @@ PhantomVfs 설계·AutoCAD VFS 실측은 **별도 저장소**를 참조합니다
 | **TFM** | .NET Framework **4.8** (`packages.config`, ZWCAD `ZwSoft.*` HintPath) |
 | **UI** | XAML `MainForm` + `PluginFormManager` (WinForm UI 미사용) |
 | **Phase 1** | **완료** — VFS 없이 MIP·팔레트·Service 동작 확인 |
-| **Phase 2** | Hook/Native **솔루션 포함·빌드 OK** (1~3단계). `VfsInterceptor` **비활성**. Setup·VFS ON은 단계별 재확인 (`ROADMAP_PHASE2_VFS.md`) |
+| **Phase 2** | Hook/Native·Setup MSI OK (4단계). **`VfsInterceptor` 활성** (5단계) — ZWCAD VFS 실측·튜닝(6~7) 진행 중 (`ROADMAP_PHASE2_VFS.md`) |
 
 ## ZWCAD에서 반드시 유지 (덮어쓰기 금지)
 
 1. **`PluginInitializer.preloadAssembly`** — `Microsoft.IdentityModel.Abstractions` 8.16.0.0 (`31bf3856ad364e35`) + `app.config` bindingRedirect  
 2. **`eDIAN.Setup.vdproj`** — ZWSOFT 레지스트리, `bin\x64\Release` 배포 경로 (AutoCAD Setup으로 **교체하지 않음**)  
 3. **net48 / packages.config / ZWCAD DLL HintPath** — AutoCAD(net8) csproj·PackageReference 패턴으로 **일괄 이관하지 않음**  
-4. **`VfsInterceptor`** — Phase 1 동안 `PluginApplication`에서 **비활성(주석)** 유지. Phase 2에서만 활성화  
+4. **`VfsInterceptor`** — `PluginApplication`에서 **활성** (5단계). 실측 실패 시에만 사용자 지시로 비활성 복귀  
 
 ## AutoCAD 저장소 (참조만)
 

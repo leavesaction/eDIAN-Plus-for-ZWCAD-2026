@@ -3,7 +3,7 @@ using ZwSoft.ZwCAD.DatabaseServices;
 using ZwSoft.ZwCAD.Runtime;
 using eDIAN.Core;
 using eDIAN.Data;
-//using eDIAN.Hook;
+using eDIAN.Hook;
 using eDIAN.Main.API;
 using eDIAN.Main.Core;
 using eDIAN.Main.Data;
@@ -94,7 +94,7 @@ namespace eDIAN.Main
                 pluginFormManager.loadMainForm();
 
                 // 4. [VFS Renaissance v3.0] 하이브리드 네이티브 훅 엔진 가동
-                // VfsInterceptor.Install();
+                VfsInterceptor.Install();
             }
             catch (System.Exception ex)
             {
@@ -204,7 +204,7 @@ namespace eDIAN.Main
             FileManager.deleteMipTempFiles();
 
             // VFS 훅 엔진 해제
-            // VfsInterceptor.Uninstall();
+            VfsInterceptor.Uninstall();
 
             logger.Info("PlugInApplication Terminate completed.");
         }
