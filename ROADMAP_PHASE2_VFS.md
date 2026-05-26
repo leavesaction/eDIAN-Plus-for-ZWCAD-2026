@@ -171,9 +171,10 @@ flowchart TB
   - [x] Native `OutDir` / `TargetName` — ZWCAD 경로 (`net8.0-windows` 없음)
 - **테스트 검증**:
   - [x] Release \| x64 Rebuild 성공
+  - [x] **Debug \| x64** 솔루션 Rebuild 성공 (박부장, 2026-05-26) — Native **1회** 빌드
   - [x] 출력 폴더에 Hook/Native DLL 존재
   - [ ] ZWCAD 로드 — **VFS 주석 유지** Phase 1 회귀 (박부장)
-- **상태**: **빌드 완료** — ZWCAD 실기 확인 남음
+- **상태**: **빌드 완료** — ZWCAD 실기 로드 회귀 남음
 
 ---
 
@@ -336,7 +337,7 @@ flowchart TB
 |------|--------|------|
 | 0 착수 승인 | 2026-05-26 | `feature/phase2-vfs`, `PHASE2_KICKOFF_GATE.md`, **실기 회귀 완료** |
 | 1 소스 이관 | 2026-05-26 | `feature/phase2-vfs` |
-| 2 빌드 연동 | 2026-05-26 | MSBuild OK, ZWCAD 로드 회귀 남음 |
+| 2 빌드 연동 | 2026-05-26 | Debug/Release MSBuild OK (박부장 확인) |
 | 3 Managed 연결 | 2026-05-26 | VFS Install 비활성 |
 | 4 Setup | | |
 | 5 VFS 활성화 | | |
