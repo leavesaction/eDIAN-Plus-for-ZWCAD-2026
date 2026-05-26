@@ -338,7 +338,7 @@ flowchart TB
 
 | 단계 | 완료일 | 비고 |
 |------|--------|------|
-| 0 착수 승인 | 2026-05-26 | `feature/phase2-vfs`, `PHASE2_KICKOFF_GATE.md` |
+| 0 착수 승인 | 2026-05-26 | `feature/phase2-vfs`, `PHASE2_KICKOFF_GATE.md`, **실기 회귀 완료** |
 | 1 소스 이관 | | |
 | 2 빌드 연동 | | |
 | 3 Managed 연결 | | |

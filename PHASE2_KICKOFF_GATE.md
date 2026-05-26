@@ -42,8 +42,15 @@
 |------|------|------|
 | **Release \| x64** MSBuild 전체 Rebuild | **성공** | 에이전트 (2026-05-26) |
 | 산출물 `eDIAN.Main\bin\x64\Release\eDIAN.dll` | 생성 확인 | 동일 |
-| ZWCAD 로드·팔레트·MIP·Service | **이전 실기 통과** (Phase 1) | 박부장 (2026-05-26 이전) |
-| `IS_FILE_ACL=false` 이후 실기 | **미실시** | 박부장 — 1단계 PR 전·후 권장 |
+| ZWCAD 로드·팔레트·MIP·Service | **통과** | 박부장 (Phase 1 + 회귀 재확인) |
+| `IS_FILE_ACL=false` 이후 실기 | **통과** | 박부장 (2026-05-26) — 보호 DWG 열기 등 |
+| **실기 회귀 (0단계)** | **완료** | 박부장 확인 (2026-05-26) |
+
+### 3.1 `IS_FILE_ACL=false` 실기 시 유의 (기록)
+
+- 과거 `IS_FILE_ACL=true` 사용 시 `…\mip_data\mip\temp`에 **Everyone Deny** ACL이 남을 수 있음.
+- `false`로 전환해도 코드는 ACL을 **제거하지 않음** → MIP `Permission denied` / temp 접근 거부 가능.
+- **조치**: temp 폴더 보안에서 Everyone( Deny ) 규칙 수동 제거 후 정상 (본 PC 실측).
 
 **빌드 명령** (기록용):
 
@@ -90,4 +97,4 @@ cd "D:\workspace_vs\eDIAN Plus for ZWCAD 2026"
 
 ---
 
-*Gate closed for step 0 — ready for step 1 on branch `feature/phase2-vfs`.*
+*Gate closed for step 0 (실기 회귀 포함) — ready for step 1 on branch `feature/phase2-vfs`.*
