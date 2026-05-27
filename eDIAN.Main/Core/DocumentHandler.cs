@@ -435,16 +435,16 @@ namespace eDIAN.Main.Core
             String filePath = targetDocument.Name;
             int hashCode = targetDocument.GetHashCode();
             bool isReadOnly = targetDocument.IsReadOnly;
-/*
+
             logger.Debug($" -------------------------------------------------------------------------------");
             logger.Debug($" >>> equals1: Comparing {targetDocument.Name} with {sourceDocument.filePath} or {sourceDocument.decryptedTemporaryFilePath}");
             logger.Debug($" >>> equals1: Comparing {targetDocument.IsReadOnly} with {sourceDocument.isReadOnly}");
             logger.Debug($" >>> equals1: Comparing {targetDocument.GetHashCode()} with {sourceDocument.hashCode}");
             logger.Debug($" -------------------------------------------------------------------------------");
-*/
+
             return (sourceDocument.filePath.Equals(filePath, StringComparison.OrdinalIgnoreCase) || sourceDocument.decryptedTemporaryFilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase))
-                && sourceDocument.hashCode == hashCode
-                && sourceDocument.isReadOnly == isReadOnly;
+                && sourceDocument.hashCode == hashCode;
+//                && sourceDocument.isReadOnly == isReadOnly;
         }
 
         // 두개의 보호 문서 정보 동일 여부 확인
@@ -454,16 +454,16 @@ namespace eDIAN.Main.Core
             int hashCode = targetDocument.hashCode;
             bool isReadOnly = targetDocument.isReadOnly;
 
-/*
+
             logger.Debug($" -------------------------------------------------------------------------------");
             logger.Debug($" >>> equals2: Comparing {targetDocument.filePath} with {sourceDocument.filePath} or {sourceDocument.decryptedTemporaryFilePath}");
             logger.Debug($" >>> equals2: Comparing {targetDocument.isReadOnly} with {sourceDocument.isReadOnly}");
             logger.Debug($" >>> equals2: Comparing {targetDocument.hashCode} with {sourceDocument.hashCode}");
             logger.Debug($" -------------------------------------------------------------------------------");
-*/
+
             return (sourceDocument.filePath.Equals(filePath, StringComparison.OrdinalIgnoreCase) || sourceDocument.decryptedTemporaryFilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase))
-                && sourceDocument.hashCode == hashCode
-                && sourceDocument.isReadOnly == isReadOnly;
+                && sourceDocument.hashCode == hashCode;
+//                && sourceDocument.isReadOnly == isReadOnly;
         }
     }
 }

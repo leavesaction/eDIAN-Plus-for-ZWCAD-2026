@@ -383,8 +383,8 @@ namespace eDIAN.Main.UI
                     }
 
                     bool isMatch = (item.source.filePath.Equals(activeDoc.Name, StringComparison.OrdinalIgnoreCase) || item.source.decryptedTemporaryFilePath.Equals(activeDoc.Name, StringComparison.OrdinalIgnoreCase))
-                        && item.source.hashCode == activeDoc.GetHashCode()
-                        && item.source.isReadOnly == activeDoc.IsReadOnly;
+                        && item.source.hashCode == activeDoc.GetHashCode();
+                        //&& item.source.isReadOnly == activeDoc.IsReadOnly;
 
                     // 경로 비교 (대소문자 무시, 필요하면 Path.GetFullPath 등으로 보정)
                     if (isMatch)
