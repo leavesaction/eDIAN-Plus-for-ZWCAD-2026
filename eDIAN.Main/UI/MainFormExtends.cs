@@ -334,12 +334,17 @@ namespace eDIAN.Main.UI
                 return;
             }
 
+            CloseFlowDiagnostics.LogPhaseByPath(e.protectedDocument.decryptedTemporaryFilePath,
+                CloseFlowDiagnostics.ClosePhase.ApplyProtectionAsyncStart, null);
+
             try
             {
                 await this.protectionController.applyProtectionToTempFile(e.protectedDocument).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
+                CloseFlowDiagnostics.LogPhaseByPath(e.protectedDocument.decryptedTemporaryFilePath,
+                    CloseFlowDiagnostics.ClosePhase.ApplyProtectionFailed, ex.Message);
                 logger.Error("applyProtectionToTempFileAsync", ex);
             }
         }

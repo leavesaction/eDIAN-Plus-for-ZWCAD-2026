@@ -41,22 +41,36 @@ namespace eDIAN.Main.UI
                     Style = PaletteSetStyles.ShowAutoHideButton | PaletteSetStyles.ShowPropertiesMenu
                 };
 
-                // 메인 폼을 팔렛에 추가
-                MainForm mainForm = new MainForm();
-
-                ElementHost host = new ElementHost
+                if (CommonConstants.PARENT_PROGRAM_VERSION.Contains("AutoCAD"))
                 {
-                    Child = mainForm,
-                    Dock = System.Windows.Forms.DockStyle.Fill
-                };
+                    // 팔렛을 보이도록 설정
+                    paletteSet.Visible = true;
 
-                paletteSet.Add("Documents", host);
+                    // 메인 폼을 팔렛에 추가
+                    paletteSet.AddVisual("Documents", new MainForm());
 
-                // 팔렛을 화면 좌측에 도킹
-                paletteSet.Dock = DockSides.Left;
+                    // 팔렛을 화면 좌측에 도킹
+                    paletteSet.Dock = DockSides.Left;
+                }
+                else if(CommonConstants.PARENT_PROGRAM_VERSION.Contains("ZWCAD"))
+                {
+                    // 메인 폼을 팔렛에 추가
+                    MainForm mainForm = new MainForm();
 
-                // 팔렛을 보이도록 설정
-                paletteSet.Visible = true;
+                    ElementHost host = new ElementHost
+                    {
+                        Child = mainForm,
+                        Dock = System.Windows.Forms.DockStyle.Fill
+                    };
+
+                    paletteSet.Add("Documents", host);
+
+                    // 팔렛을 화면 좌측에 도킹
+                    paletteSet.Dock = DockSides.Left;
+
+                    // 팔렛을 보이도록 설정
+                    paletteSet.Visible = true;
+                }
             }
             else 
             {

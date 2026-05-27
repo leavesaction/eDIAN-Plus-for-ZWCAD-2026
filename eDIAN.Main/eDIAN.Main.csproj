@@ -145,6 +145,7 @@
     <Compile Include="Core\ClipboardNotification.cs" />
     <Compile Include="Core\DisplayProtector.cs" />
     <Compile Include="Core\DocumentHandler.cs" />
+    <Compile Include="Core\CloseFlowDiagnostics.cs" />
     <Compile Include="Core\FileManager.cs" />
     <Compile Include="Core\MessageHandler.cs" />
     <Compile Include="Core\PluginInitializer.cs" />

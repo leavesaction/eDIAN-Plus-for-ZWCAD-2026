@@ -1568,6 +1568,10 @@ namespace eDIAN.Main
             // 문서 보안 정보에 저장된 파일명
             String protectedFilePath = protectedDocument.filePath;
 
+            CloseFlowDiagnostics.LogPhaseByPath(protectedDocument.decryptedTemporaryFilePath,
+                CloseFlowDiagnostics.ClosePhase.ApplyProtectionBegin,
+                $"filePath='{Path.GetFileName(protectedFilePath)}'");
+
             try
             {
                 if (!File.Exists(protectedFilePath))
@@ -1608,22 +1612,33 @@ namespace eDIAN.Main
 
                         // 임시 파일 보호 핸들러에 적용된 정보를 Commit
                         result = await tempFileHandler.CommitAsync(protectedFilePath);
+                        CloseFlowDiagnostics.LogPhaseByPath(protectedDocument.decryptedTemporaryFilePath,
+                            CloseFlowDiagnostics.ClosePhase.ApplyProtectionCommitDone, $"result={result}");
                     }
 
                     if (!String.IsNullOrWhiteSpace(protectedDocument.decryptedTemporaryFilePath))
                     {
+                        CloseFlowDiagnostics.LogPhaseByPath(protectedDocument.decryptedTemporaryFilePath,
+                            CloseFlowDiagnostics.ClosePhase.ApplyProtectionDeleteBegin, null);
                         // 기존 임시 파일 삭제
                         FileManager.deleteFilesByName(protectedDocument.decryptedTemporaryFilePath);
+                        CloseFlowDiagnostics.LogPhaseByPath(protectedDocument.decryptedTemporaryFilePath,
+                            CloseFlowDiagnostics.ClosePhase.ApplyProtectionDeleteEnd, null);
                     }
                 }
                 else
                 {
                     logger.Debug($" - applyProtectionAtTempFile : 원본 파일이 레이블링이 적용된 파일이 아닙니다.");
                 }
+
+                CloseFlowDiagnostics.LogPhaseByPath(protectedDocument.decryptedTemporaryFilePath,
+                    CloseFlowDiagnostics.ClosePhase.ApplyProtectionEnd, $"success={result}");
             }
             catch (Exception ex)
             {
                 result = false;
+                CloseFlowDiagnostics.LogPhaseByPath(protectedDocument.decryptedTemporaryFilePath,
+                    CloseFlowDiagnostics.ClosePhase.ApplyProtectionFailed, ex.Message);
                 logger.Error($"  * applyProtectionToTempFile", ex);
             }
 

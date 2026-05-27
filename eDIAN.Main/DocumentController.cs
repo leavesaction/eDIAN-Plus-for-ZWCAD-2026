@@ -192,6 +192,11 @@ namespace eDIAN.Main
                 {
                     ProtectedDocument protectedDocument = PluginApplication.documentHandler.getOpenDocument(e.Document);
 
+                    CloseFlowDiagnostics.LogPhaseByPath(docName, CloseFlowDiagnostics.ClosePhase.DocumentToBeDestroyed,
+                        protectedDocument != null
+                            ? $"needLabeling={protectedDocument.needLabeling} edit={protectedDocument.isEdit}"
+                            : "protectedDocument=null");
+
                     // 존재하는 경우 대기열에 저장
                     if (protectedDocument != null)
                     {
@@ -232,7 +237,7 @@ namespace eDIAN.Main
                 string fileName = e.FileName ?? string.Empty;
                 logger.Debug($" - Document : '...\\{Path.GetFileName(fileName)}', HashCode : {e.GetHashCode()}");
 
-                // 2. 파일명으로 찾지 않고, 큐에서 방금 닫힌 문서를 넘겨받음
+                // 파일명으로 찾지 않고, 큐에서 방금 닫힌 문서를 넘겨받음
                 if (_pendingDestroyQueue.TryGetValue(fileName, out var queue) && queue.Count > 0)
                 {
                     ProtectedDocument protectedDocument = queue.Dequeue();
@@ -248,25 +253,33 @@ namespace eDIAN.Main
                     {
                         // 보호 적용된 파일일 경우
 
-                        if (protectedDocument.isEdit && protectedDocument.needLabeling)
+                        CloseFlowDiagnostics.LogPhaseByPath(fileName, CloseFlowDiagnostics.ClosePhase.DocumentDestroyed,
+                            $"needLabeling={protectedDocument.needLabeling} edit={protectedDocument.isEdit}");
+
+                        if (protectedDocument.needLabeling)
                         {
                             // 임시파일에 보호 적용을 한다.(파일명이 중복 되는 경우 없음)
                             // 보호된 도면이 닫힐 때 event 호출 (applyProtectionToTempFile). 
 
+                            CloseFlowDiagnostics.LogPhaseByPath(fileName, CloseFlowDiagnostics.ClosePhase.DestroyBranchApplyProtection, null);
                             OnDestroyDocument?.Invoke(this, new ProtectedDocumentEventArgs(protectedDocument));
                         }
                         else 
                         {
                             if (!String.IsNullOrWhiteSpace(protectedDocument.decryptedTemporaryFilePath))
                             {
+                                CloseFlowDiagnostics.LogPhaseByPath(fileName, CloseFlowDiagnostics.ClosePhase.DestroyBranchDeleteFiles,
+                                    $"temp='{Path.GetFileName(protectedDocument.decryptedTemporaryFilePath)}'");
                                 // 기존 임시 파일 삭제
                                 FileManager.deleteFilesByName(protectedDocument.decryptedTemporaryFilePath);
                             }
                         }
                     }
 
+                    CloseFlowDiagnostics.LogPhaseByPath(fileName, CloseFlowDiagnostics.ClosePhase.RemoveOpenDocument, null);
                     // 열린 문서 목록에서 제거
                     PluginApplication.documentHandler.removeOpenDocument(protectedDocument);
+                    CloseFlowDiagnostics.CompleteByPath(fileName);
                 }
                 else
                 {

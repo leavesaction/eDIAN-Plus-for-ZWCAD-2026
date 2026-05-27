@@ -370,8 +370,13 @@ namespace eDIAN.Main.UI
                 return;
             }
 
+            string closeFlowId = CloseFlowDiagnostics.BeginSession("PaletteClose", protectedDocument);
+            CloseFlowDiagnostics.RegisterKey(closeFlowId, document.Name);
+
             try
             {
+                this.activateDocumentForClose(document, protectedDocument, closeFlowId);
+
                 bool isClosedAndSaved = false;
 
                 using (document.LockDocument())
@@ -401,15 +406,20 @@ namespace eDIAN.Main.UI
                                 {
                                     // Yes 버튼 클릭 : 저장 후 닫기  
                                     isClosedAndSaved = true;
+                                    CloseFlowDiagnostics.LogPhase(closeFlowId, CloseFlowDiagnostics.ClosePhase.ConfirmSaveYes,
+                                        $"dbmod={CloseFlowDiagnostics.ReadDbMod()}");
                                 }
                                 else
                                 {
                                     // No 버튼 클릭 : 저장하지 않고 닫기
                                     isClosedAndSaved = false;
+                                    CloseFlowDiagnostics.LogPhase(closeFlowId, CloseFlowDiagnostics.ClosePhase.ConfirmSaveNo,
+                                        $"dbmod={CloseFlowDiagnostics.ReadDbMod()}");
                                 }
                             }
                             else
                             {
+                                CloseFlowDiagnostics.LogPhase(closeFlowId, CloseFlowDiagnostics.ClosePhase.ConfirmCancel, null);
                                 return;
                             }
                         }
@@ -449,28 +459,29 @@ namespace eDIAN.Main.UI
 
                     if (!String.IsNullOrEmpty(filePath))
                     {
-                        // 파일 명이 존재하는 경우 "저장만" 수행 (문서는 닫지 않음)
-                        using (document.LockDocument())
-                        {
-                            document.Database.SaveAs(filePath,
-                                true,                       // bak 파일 생성 여부
-                                DwgVersion.Current,          // 현재 버전으로 저장
-                                document.Database.SecurityParameters
-                            );
-                        }
+                        CloseFlowDiagnostics.LogPhase(closeFlowId, CloseFlowDiagnostics.ClosePhase.SaveAsBegin,
+                            $"CloseAndSave target='{Path.GetFileName(filePath)}' {CloseFlowDiagnostics.DescribeCadDocument(document)}");
+
+                        // [6a] 저장 후 닫기: SaveAs + CloseAndDiscard 조합 대신 CloseAndSave로 저장+닫기 (ZWCAD FileTabs NRE 회피)
+                        document.CloseAndSave(filePath);
+
+                        CloseFlowDiagnostics.LogPhase(closeFlowId, CloseFlowDiagnostics.ClosePhase.SaveAsEnd,
+                            "CloseAndSave returned (saved+closed)");
+
+                        // 저장 후 닫기 경로는 여기서 종료 (CloseAndDiscard로 내려가지 않음)
+                        return;
                     }
                 }
 
                 if (document != null && !document.IsDisposed && document.UnmanagedObject != IntPtr.Zero)
                 {
-                    try
-                    {
-                        document.CloseAndDiscard(); // 저장하지 않고 닫기
-                    }
-                    catch (Exception e)
-                    {
-                        logger.Error(" - closeDocument: CloseAndDiscard() failed, trying Close() instead.", e);
-                    }
+                    CloseFlowDiagnostics.LogPhase(closeFlowId, CloseFlowDiagnostics.ClosePhase.BeforeCloseAndDiscard,
+                        CloseFlowDiagnostics.DescribeCadDocument(document));
+
+                    document.CloseAndDiscard(); // 저장하지 않고 닫기
+
+                    CloseFlowDiagnostics.LogPhase(closeFlowId, CloseFlowDiagnostics.ClosePhase.AfterCloseAndDiscard,
+                        "CloseAndDiscard returned");
                 }
             }
             catch (COMException ex)
@@ -491,6 +502,35 @@ namespace eDIAN.Main.UI
 
                 MessageHandler.Show(message, "Error");
             }
+        }
+
+        /// <summary>
+        /// 팔레트 X 닫기: 비활성 문서를 바로 Close하면 ZWCAD FileTabs teardown 중
+        /// Document.Database NRE가 날 수 있어, 닫기 전 MdiActive를 대상 문서로 맞춘다.
+        /// 활성화 후 DBMOD로 <see cref="ProtectedDocument.isUpdated"/>를 동기화한다.
+        /// </summary>
+        private void activateDocumentForClose(Document document, ProtectedDocument protectedDocument, string closeFlowId)
+        {
+            string mdiContext = CloseFlowDiagnostics.DescribeMdiActiveContext(document);
+            Document active = CadApplication.DocumentManager.MdiActiveDocument;
+            bool wasActive = ReferenceEquals(active, document);
+
+            if (!wasActive)
+            {
+                CadApplication.DocumentManager.MdiActiveDocument = document;
+            }
+
+            int dbmod = CloseFlowDiagnostics.ReadDbMod();
+            bool isUpdated = dbmod != 0;
+
+            if (protectedDocument.isUpdated != isUpdated)
+            {
+                protectedDocument.isUpdated = isUpdated;
+                logger.Debug($" - closeDocument: isUpdated synced to {isUpdated} (dbmod={dbmod})");
+            }
+
+            CloseFlowDiagnostics.LogPhase(closeFlowId, CloseFlowDiagnostics.ClosePhase.ActivateForClose,
+                $"{mdiContext} didActivate={!wasActive} isUpdated={protectedDocument.isUpdated} dbmod={dbmod}");
         }
 
         /// <summary>
