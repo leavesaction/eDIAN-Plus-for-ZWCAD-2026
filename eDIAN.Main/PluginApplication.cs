@@ -93,9 +93,8 @@ namespace eDIAN.Main
                 // 3. 통합 플러그인 폼 표시
                 pluginFormManager.loadMainForm();
 
-                // 4. [Phase 2 Step 6a] 저장·닫기 플러그인 안정화 전까지 VFS 비활성 (안정화 후 Install 재개)
-                // VfsInterceptor.Install();
-                logger.Info("[Phase 6a] VfsInterceptor.Install skipped — close-flow plugin validation (see close_flow.log).");
+                // 4. [VFS Renaissance v3.0] 하이브리드 네이티브 훅 엔진 가동 (Phase 6b: 6a 닫기 안정화 후 재활성)
+                VfsInterceptor.Install();
             }
             catch (System.Exception ex)
             {
@@ -204,8 +203,8 @@ namespace eDIAN.Main
             // MIP 임시 파일 삭제
             FileManager.deleteMipTempFiles();
 
-            // VFS 훅 엔진 해제 (6a: Install 비활성 시 Uninstall 생략)
-            // VfsInterceptor.Uninstall();
+            // VFS 훅 엔진 해제
+            VfsInterceptor.Uninstall();
 
             logger.Info("PlugInApplication Terminate completed.");
         }
