@@ -9,6 +9,8 @@
 | **원본 저장소** | `D:\workspace_vs\eDIAN Plus for AutoCAD 2026` |
 | **GitHub** | [eDIAN-Plus-for-ZWCAD-2026](https://github.com/leavesaction/eDIAN-Plus-for-ZWCAD-2026) |
 | **관련 AutoCAD 로드맵** | `ROADMAP_PLUGIN_BASELINE.md` (5단계 ZWCAD 포팅 완료), `ROADMAP_STEALTH_VFS.md` (Native VFS 기능 기준) |
+| **실물 노출·가상화 설계 (6단계 하위)** | [ROADMAP_PHASE2_VFS_LIFECYCLE.md](./ROADMAP_PHASE2_VFS_LIFECYCLE.md) — 시점별 노출/기화 계약·Native L1~L7 |
+| **ZWCAD 단일 기준(운영/실측/판정)** | [ZWCAD_VFS_ENGINEERING_GUIDE.md](./ZWCAD_VFS_ENGINEERING_GUIDE.md) — 검증(P0/P1/P2), ETW/Procmon 판정, 프리징 0 게이트 |
 
 ---
 
@@ -22,6 +24,7 @@
   - `eDIAN.Setup.vdproj` — ZWSOFT 레지스트리, `bin\x64\Release` 배포 경로
   - **net48** / `packages.config` / ZWCAD `ZwSoft.*` HintPath — AutoCAD(net8) csproj·PackageReference **일괄 이관 금지**
 - **승인 게이트** (`AGENTS.md`): Hook/Native 솔루션 추가, **Setup DLL 목록 변경**, `VfsInterceptor.Install()` 활성화는 **착수 전 사용자(박부장) 확인** 후 진행.
+- **프리징 0 게이트**: 저장(QSAVE/SAVE)에서 CAD 프리징이 발생하면 해당 빌드는 **즉시 폐기/롤백 후 재설계**한다. (상세: [ZWCAD_VFS_ENGINEERING_GUIDE.md](./ZWCAD_VFS_ENGINEERING_GUIDE.md) §6)
 
 ---
 
@@ -226,6 +229,24 @@ flowchart TB
 ### 6단계 — ZWCAD 실측·튜닝
 
 - **목적**: 코드에 정의된 ZWCAD 프로필을 **현장 데이터**로 검증·보정.
+- **설계 상세 (실물 노출·가상화 생명주기)**: [ROADMAP_PHASE2_VFS_LIFECYCLE.md](./ROADMAP_PHASE2_VFS_LIFECYCLE.md)
+- **판정·검증 단일 기준**: [ZWCAD_VFS_ENGINEERING_GUIDE.md](./ZWCAD_VFS_ENGINEERING_GUIDE.md) (P0/P1/P2, ETW [A/B/C/D], 실패 시 로그 교차 SOP)
+- **진행 기록(성공/실패 요약)**: [PHASE2_STEP6_FIELD_TEST_HISTORY.md](./PHASE2_STEP6_FIELD_TEST_HISTORY.md)
+
+#### 6a — MIP·저장·닫기 실물 노출 (Native)
+
+> 시점별 계약·구현 개념·검증 시나리오는 **LIFECYCLE 문서** 참조. 본 절은 **진행 상태만** 관리.
+
+| ID | 항목 | 담당 | 상태 |
+|----|------|------|------|
+| L1 | Managed: `equals`에서 `isReadOnly` 제외 | Main | **완료** (`608f91f`, `feature/phase2-vfs`) |
+| L2 | Native: 닫기 **Materialize + VirtualRelease** | Hook.Native | **구현** (Debug 빌드, L6 실측 대기) |
+| L3 | Native: QSAVE **SaveExposed** / 저장 후 디스크만 기화 | Hook.Native | 대기 |
+| L4 | Native: 외부(EPDF) 시작 노출 · 종료 실물 기화 | Hook.Native | 대기 |
+| L5 | Native: 로그 `[CLOSE]` / `[SAVE-IO]` / `[EXTERNAL]` | Hook.Native | 대기 |
+| L6 | 실측: 저장 → 닫기 → `test_01` 재오픈 | 박부장 | 대기 |
+| L7 | AutoCAD 회귀 1회 | 박부장 | 대기 |
+
 - **호환성 매트릭스** (AutoCAD 호환성 보고서 H1~H10 요약):
 
 | ID | 항목 | 조치 |
@@ -251,7 +272,7 @@ flowchart TB
   - [ ] ZWCAD **정상 종료** 및 **강제 종료** 후 세션 폴더 소거
   - [ ] (선택) 크래시 덤프·Procmon 캡처 아카이브
 
-- **상태**: _대기_
+- **상태**: **진행 중** — §6a L1 완료, L2~L7 대기 (2026-05-27)
 
 ---
 
@@ -344,7 +365,7 @@ flowchart TB
 | 3 Managed 연결 | 2026-05-26 | VFS Install 비활성 |
 | 4 Setup | 2026-05-26 | MSI 빌드·설치·레지스트리·Hook DLL 실측 완료 |
 | 5 VFS 활성화 | 2026-05-26 | ZWCAD Debug 기동·`vfs_console` ZWCAD.exe·Vaporize 확인 |
-| 6 실측·튜닝 | | |
+| 6 실측·튜닝 | 2026-05-27~ | §6a LIFECYCLE 트랙 진행 중 |
 | 7 Baseline 고정 | | |
 
 ---
@@ -360,10 +381,11 @@ flowchart TB
 | **E** | MSI | 4단계 |
 | **F** | VFS ON | 5단계 |
 | **G** | 실측·튜닝·태그 | 6~7단계 |
+| **L** | MIP·저장·닫기 실물 노출 ([LIFECYCLE](./ROADMAP_PHASE2_VFS_LIFECYCLE.md)) | 6a (L1~L7) |
 
-**권장 최소 진행**: **A → B → C** (VFS 비활성 빌드 성공) → 박부장 확인 → **E → F → G**
+**권장 최소 진행**: **A → B → C** (VFS 비활성 빌드 성공) → 박부장 확인 → **E → F → G** → **L2~L6** (MIP 재오픈 실측 통과 후 7단계)
 
 ---
 
-**Last Updated**: 2026-05-26  
-**Status**: **5단계 완료** — **6단계** Plot/Publish·Procmon·`HookConstants` 실측
+**Last Updated**: 2026-05-27  
+**Status**: **5단계 완료** — **6단계** 진행 중 (H1~H10 + **§6a LIFECYCLE**)

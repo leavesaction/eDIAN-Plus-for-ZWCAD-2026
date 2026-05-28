@@ -6,6 +6,8 @@
 | **요청** | 사용자 — «착수 게이트 진행» |
 | **브랜치** | `feature/phase2-vfs` |
 | **로드맵** | `ROADMAP_PHASE2_VFS.md` §0, §5 0단계 |
+| **설계(생명주기 계약)** | `ROADMAP_PHASE2_VFS_LIFECYCLE.md` |
+| **단일 기준(실측/판정)** | `ZWCAD_VFS_ENGINEERING_GUIDE.md` |
 
 ---
 
@@ -17,6 +19,8 @@
 | **단계별 재확인** | 4 | **완료** | MSI 설치·Hook DLL·ZWCAD 레지스트리 LOADER 회귀 없음 (2026-05-26) |
 | **단계별 재확인** | 5 | **완료** | VFS ON·ZWCAD Debug 기동·`vfs_console` ZWCAD.exe 확인 (2026-05-26) |
 | **사용자 실측** | 6~7 | 박부장 | ZWCAD Plot/Publish·세션 소거·`HookConstants` 보정 |
+
+> **프리징 0 게이트(최우선)**: QSAVE/SAVE에서 CAD 프리징이 발생하면 해당 빌드는 **즉시 폐기/롤백 후 재설계**한다. (상세 기준: `ZWCAD_VFS_ENGINEERING_GUIDE.md` §6)
 
 ---
 
@@ -32,7 +36,7 @@
 - **로컬 경로**: `D:\workspace_vs\eDIAN Plus for AutoCAD 2026`
 - **복사 대상**: `eDIAN.Hook\`, `eDIAN.Hook.Native\` (소스·vcxproj만, `bin`/`obj`/`x64` 빌드 산출물 제외)
 
-> AutoCAD `main` HEAD가 `e24afc9`이므로 Phase 2 이관 원본은 **별도 태그 없이 이 커밋**을 사용한다.
+> AutoCAD `main` HEAD가 `e24afc9`이므로 Phase 2 이관 원본은 **별도 태그 없이 이 커밋**을 사용한다. (동일 내용은 `ROADMAP_PHASE2_VFS.md` §10.1에도 기록)
 
 ---
 
@@ -59,6 +63,8 @@ cd "D:\workspace_vs\eDIAN Plus for ZWCAD 2026"
 & "C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\amd64\MSBuild.exe" /t:Rebuild /p:Configuration=Release /p:Platform="x64" /m /v:m
 ```
 
+> 공식 빌드 규칙·경로는 `.cursor/rules/build_standard.mdc`가 단일 기준이다.
+
 ---
 
 ## 4. 실측 환경
@@ -70,14 +76,6 @@ cd "D:\workspace_vs\eDIAN Plus for ZWCAD 2026"
 | Managed 참조 | `ZwManaged.dll`, `ZwDatabaseMgd.dll` (동일 경로) |
 | 플랫폼 | **x64** |
 | `PARENT_PROGRAM_VERSION` | `ZWCAD 2026` → Native **ZWCAD 프로필** (`HookConstants`) |
-
-### 4.1 Phase 6 실측 시나리오 (체크리스트)
-
-- [ ] 보호 DWG 열기·저장·닫기·재보호
-- [ ] Plot / Publish (부속 exe Procmon → `ZWCAD_TRUSTED_PROCESSES`)
-- [ ] `%LocalAppData%\...\temp\` 경로 샘플 → `ZWCAD_TEMP_PATTERNS`
-- [ ] 정상 종료·강제 종료 후 VFS 세션 폴더 소거
-- [ ] `eDIAN.Service.exe` Pipe 단절 후 소거 (~600ms, Stealth VFS 기준)
 
 ---
 
@@ -93,7 +91,7 @@ cd "D:\workspace_vs\eDIAN Plus for ZWCAD 2026"
 
 ## 6. 다음 작업
 
-**다음** — 로드맵 **6단계**: Plot/Publish Procmon, `HookConstants` ZWCAD 프로필, 세션 폴더 소거.
+**다음** — 진행/체크리스트는 `ROADMAP_PHASE2_VFS.md`의 **6단계(실측·튜닝)** 를 단일 기준으로 따른다.
 
 ---
 

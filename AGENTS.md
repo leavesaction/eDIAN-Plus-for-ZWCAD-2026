@@ -19,7 +19,7 @@ PhantomVfs 설계·AutoCAD VFS 실측은 **별도 저장소**를 참조합니다
 | **TFM** | .NET Framework **4.8** (`packages.config`, ZWCAD `ZwSoft.*` HintPath) |
 | **UI** | XAML `MainForm` + `PluginFormManager` (WinForm UI 미사용) |
 | **Phase 1** | **완료** — VFS 없이 MIP·팔레트·Service 동작 확인 |
-| **Phase 2** | Hook/Native·Setup MSI OK (4단계). **`VfsInterceptor` 활성** (5단계) — ZWCAD VFS 실측·튜닝(6~7) 진행 중 (`ROADMAP_PHASE2_VFS.md`) |
+| **Phase 2** | Hook/Native·Setup MSI OK (4단계). **`VfsInterceptor` 활성** (5단계) — ZWCAD VFS 실측·튜닝(6~7) 진행 중 ([`ROADMAP_PHASE2_VFS.md`](./ROADMAP_PHASE2_VFS.md), 실물 노출 설계: [`ROADMAP_PHASE2_VFS_LIFECYCLE.md`](./ROADMAP_PHASE2_VFS_LIFECYCLE.md)) |
 
 ## ZWCAD에서 반드시 유지 (덮어쓰기 금지)
 
@@ -42,8 +42,31 @@ PhantomVfs 설계·AutoCAD VFS 실측은 **별도 저장소**를 참조합니다
 
 1. **빌드**: `.cursor/rules/build_standard.mdc` — VS 18 MSBuild, `Platform=x64`, 출력 `bin\x64\{Configuration}\`  
 2. **가상화**: Phase 2 전 **Hook/Native/Setup DLL 목록 변경**은 사용자 확인 후 진행  
-3. **로그** (실측 시): `eDIAN.Main\bin\x64\Debug\logs\` — `plugin.log`, `application.log`, `service_*.log`  
+3. **로그** (실측 시): 아래 **«로그 교차 검증»** 절차 준수 — 단일 파일만으로 원인 단정 금지  
 4. **크래시·VFS 실측·EOD**: AutoCAD 워크스페이스의 스킬·규칙 사용 (필요 시 해당 창에서 작업)
+
+## 로그 교차 검증 (원인 분석 SOP)
+
+VFS·MIP·닫기·재오픈 이슈는 **여러 로그를 같은 시각·같은 temp UUID·CorrelationId로 묶어** 분석한다. 상세 매트릭스: [`ROADMAP_PHASE2_VFS_LIFECYCLE.md` §9](./ROADMAP_PHASE2_VFS_LIFECYCLE.md#9-로그-교차-검증-에이전트-sop).
+
+| 로그 | 경로 (Debug 기준) | 주로 보는 것 |
+|------|------------------|-------------|
+| Native VFS | `eDIAN.Main\bin\x64\Debug\logs\vfs_console_{PID}.log` | `[CLOSE]`, `[SAVE-IO]`, CopyFile, 흡수·기화, 바이트 수 |
+| Managed | `...\logs\application.log` | `openDocumentFile`, `applyProtectionToTempFile`, UI 메시지 대응 스택 |
+| 닫기 흐름 | `...\logs\close_flow.log` | `[CLOSE-FLOW]` 단계, ApplyProtection 성공/실패 |
+| MIP SDK | `%LocalAppData%\edian+\mip_data\mip\logs\mip_sdk.miplog` | `file_create_file_handler`, `file_commit_async`, `OpenInput`, FileIOError |
+| 기타 | `plugin.log`, `service_*.log` | 기동·Pipe (본 이슈는 보조) |
+
+**분석 순서 (권장)**  
+1. 사용자 증상·대략 시각·`test_01` / `_uuid.dwg` 확인  
+2. `close_flow.log` 또는 `application.log`에서 해당 구간·temp UUID 확보  
+3. 동일 초에 `vfs_console_{PID}.log` — VFS I/O 순서·크기  
+4. 동일 경로·CorrelationId(`0437e3ae-...` 등)로 `mip_sdk.miplog` 대조  
+5. 필요 시 Procmon(실물 존재·순서 **확정**)
+
+**증상별 최소 세트**  
+- 변경 미반영·닫기 MIP 실패: `close_flow` + `application` + `mip_sdk` + `vfs_console`  
+- 재오픈 오류(`error.document.open`): `application` + `mip_sdk` (+ 닫기 직전 `vfs_console`에서 commit 내용)
 
 ## 빌드·배포 순서 (요약)
 
@@ -52,4 +75,4 @@ PhantomVfs 설계·AutoCAD VFS 실측은 **별도 저장소**를 참조합니다
 3. Setup 출력 경로는 **`..\eDIAN.Main\bin\x64\Release\`** (net8 하위 폴더 **아님**)
 
 ---
-*최종 업데이트: 2026-05-26 — Phase 2 착수 게이트(0단계) 완료*
+*최종 업데이트: 2026-05-28 — 로그 교차 검증 SOP 추가*
