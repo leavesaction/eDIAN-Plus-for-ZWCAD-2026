@@ -2,9 +2,32 @@
 #include "IVfsEngine.h"
 #include "VfsLogger.h"
 #include <algorithm>
+#include <atomic>
 #include <shlwapi.h>
 
 #pragma comment(lib, "Shlwapi.lib")
+
+// SEH는 C++ 스택 언와인딩(소멸자 호출)과 충돌할 수 있으므로,
+// SEH는 "소멸자 없는" 작은 헬퍼 함수에서만 사용한다.
+static BOOL WINAPI TryTrueCloseHandleNoThrow(HANDLE h) {
+    __try {
+        return TrueCloseHandle(h);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        return FALSE;
+    }
+}
+
+// ZWCAD 저장(QSAVE) 구간 추정용: zws*.tmp sidecar I/O가 발생하면 짧은 시간 동안 JIT 실체화를 억제한다.
+// 목적: 저장 마무리(Replace/Move/Copy) 시퀀스 동안 _uuid.dwg를 독점(share=0)으로 붙잡지 않게 하여
+//       “DWG 저장 실패 → TMP로 저장” 메시지를 줄인다. (L3 SaveExposed의 최소 구현)
+static std::atomic<ULONGLONG> g_lastZwcadSaveSidecarTick{ 0 };
+static bool IsZwcadSaveSidecarPath(LPCWSTR lpFileName) {
+    if (!lpFileName) return false;
+    // mip\temp 아래 zws*.tmp (대소문자 무시)
+    return (StrStrIW(lpFileName, L"\\mip_data\\mip\\temp\\zws") != NULL) &&
+           (_wcsicmp(PathFindExtensionW(lpFileName), L".tmp") == 0);
+}
 
 /** @brief 폴더 삭제 감시: 임시 폴더 삭제 시 관리 중인 핸들들을 정리합니다. */
 BOOL WINAPI Hooked_RemoveDirectoryW(LPCWSTR lpPathName) {
@@ -27,6 +50,12 @@ HANDLE WINAPI Internal_CreateFileW(LPCWSTR lpFileName, DWORD dwAccess,
     // [Phase 3: API Tracing] 상세 호출 기록
     VFS_LOG_DEBUG(L"[TRACE] CreateFileW: %s (Access: 0x%08X, Creation: %d)", 
                lpFileName ? lpFileName : L"NULL", dwAccess, dwCreation);
+
+    // ZWCAD 저장(QSAVE) sidecar(zws*.tmp)는 반드시 감지되어야 하므로,
+    // engine.IsManifestingPath 분기와 무관하게 진입 초기에 시각을 기록한다.
+    if (IsZwcadSaveSidecarPath(lpFileName)) {
+        g_lastZwcadSaveSidecarTick.store(GetTickCount64(), std::memory_order_relaxed);
+    }
 
     // [VFS Phase 9.5: Integrated Security Guard] 
     // 비인가 프로세스의 보호 구역(Ghost, eDIAN) 접근을 원천 차단 (읽기/복사 방지)
@@ -134,6 +163,15 @@ HANDLE WINAPI Internal_CreateFileW(LPCWSTR lpFileName, DWORD dwAccess,
             if (dwAccess & GENERIC_READ) {
                 bool isReadOnlyPlot =
                     (dwAccess == GENERIC_READ) || (dwAccess == FILE_READ_DATA);
+
+                // ZWCAD 저장 sidecar(zws*.tmp) 직후 구간에서는 JIT 실체화(share=0 독점)를 억제한다.
+                // 저장 마무리의 원자 교체(Replace/Move/Copy)와 충돌하면 “DWG 저장 실패 → TMP 저장”이 발생할 수 있음.
+                ULONGLONG lastSidecar = g_lastZwcadSaveSidecarTick.load(std::memory_order_relaxed);
+                if (!isExternal && lastSidecar != 0 && (now - lastSidecar) < 5000) {
+                    VFS_LOG_INFO(L"[SAVE-IO] JIT 실체화 억제(저장 구간, %llums): %s",
+                               (now - lastSidecar), path.c_str());
+                    goto skip_jit_manifesting;
+                }
                 if (isExternal || isReadOnlyPlot ||
                     (now - vf->lastVaporizedTime > 500)) {
                     if (vf->isManifesting.exchange(true)) {
@@ -181,6 +219,7 @@ HANDLE WINAPI Internal_CreateFileW(LPCWSTR lpFileName, DWORD dwAccess,
                 }
             }
         }
+skip_jit_manifesting:
 
         // 4. 고스트 핸들 생성: 실물 파일 대신 유니크한 임시 파일로 우회
         std::wstring uniqueGhost = engine.GetUniqueGhostPath(path);
@@ -354,16 +393,16 @@ BOOL WINAPI Internal_CloseHandle(HANDLE hFile) {
                 } else {
                     VFS_LOG_ERR(L"!!! 최종 변경사항 디스크 커밋 실패 (보존 조치): %s", commitTarget->path.c_str());
                 }
-                TrueCloseHandle(hOrig);
+                TryTrueCloseHandleNoThrow(hOrig);
             }
         }
         if (commitTarget->hKeeper != INVALID_HANDLE_VALUE) {
-            TrueCloseHandle(commitTarget->hKeeper);
+            TryTrueCloseHandleNoThrow(commitTarget->hKeeper);
             commitTarget->hKeeper = INVALID_HANDLE_VALUE;
         }
         VFS_LOG_INFO(L"[VFS] 가상 파일 참조 해제 및 Keeper 폐쇄: %s", commitTarget->path.c_str());
     }
-    return TrueCloseHandle(hFile);
+    return TryTrueCloseHandleNoThrow(hFile);
 }
 
 /** @brief 핸들 닫기 래퍼: SEH 보호막을 제공합니다. */
@@ -376,7 +415,8 @@ BOOL WINAPI Hooked_CloseHandle(HANDLE hFile) {
         DWORD code = GetExceptionCode();
         VFS_LOG_ERR(L"!!! CRITICAL EXCEPTION in CloseHandle for Handle: 0x%p (Code: 0x%08X)",
                    hFile, code);
-        return TrueCloseHandle(hFile);
+        // 예외 상황에서는 내부 상태 보장을 최우선으로 두고, 원본 CloseHandle은 no-throw 래퍼로 호출한다.
+        return TryTrueCloseHandleNoThrow(hFile);
     }
 }
 

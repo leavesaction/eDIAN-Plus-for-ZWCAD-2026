@@ -132,6 +132,12 @@ bool AccessGuard::IsManifestingPath(LPCWSTR lpFileName) const {
   if (!lpFileName || !lpFileName[0])
     return false;
 
+  // MIP SDK 작업 디렉터리는 VFS 가상화 대상으로 취급하면 안 된다.
+  // (중간 산출물(_uuid.dwg), sidecar(tmp), bak 등이 rename 기반으로 정리되며, 가상화/기화가 끼면 저장이 무너질 수 있음)
+  if (StrStrIW(lpFileName, RELATIVE_MIP_TEMP_DIR) != nullptr) {
+    return true;
+  }
+
   // [Fast-Path] 정규화 작업 없이 원본 파일명에서 임시 패턴 매칭을 먼저 체크
   for (const auto &pattern : m_tempPatterns) {
     if (StrStrIW(lpFileName, pattern.c_str()) != nullptr) {
