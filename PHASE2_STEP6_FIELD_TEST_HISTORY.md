@@ -80,6 +80,70 @@
   - 저장 시 `.dwg` 저장 실패 → `.tmp`로 저장 메시지
   - 보호 DWG 닫기→재오픈 무효/손상(본 기록에서는 상세 로그를 재정리하지 않았으며, 이후 Native 롤백 후 L2/L3를 단일 변경으로 재도입하며 재현/확정 필요)
 
+## 4.1 (추가 기록) 5단계 Native 복원 후 재현(동일 증상 확인)
+
+- **시점**: 2026-05-28 16:10~16:11 (ZWCAD PID **24180**)
+- **대상**: `test_01.dwg` → temp `_bc65d667-dd4e-4957-b5f2-b0b4affd2328.dwg`
+- **판정**: **동일 증상 재현(미해결 유지)** — “5단계 Native 기준선에서도 문제 존재”를 재확인
+
+### A) Managed/CloseFlow 관측(요약)
+
+- `application.log`:
+  - QSAVE 이후 닫기 흐름에서 `applyProtectionToTempFile`가 **Permission denied**로 실패
+  - temp 삭제도 “다른 프로세스에서 사용 중”으로 실패
+- `close_flow.log`:
+  - `ApplyProtectionFailed … Failed to open file, Permission denied`
+  - CorrelationId: **`ec1fdc72-25c0-48ae-ae72-ee60bcef860e`**
+
+### B) Native 관측(요약)
+
+`vfs_console_24180.log`에서 다음이 순서대로 관측됨:
+
+- `_uuid.dwg` 실물 흡수/기화 및 고스트 생성
+- QSAVE 구간에서 `zws*.tmp` 생성/기화 및 Keeper 폐쇄
+- **`최종 변경사항 디스크 커밋 완료`** (33235 bytes) 후
+- **`!!! CRITICAL EXCEPTION in CloseHandle … (Code: 0xC0000008)`**
+
+### C) MIP SDK 관측(요약)
+
+`mip_sdk.miplog`:
+
+- `_bc65d667-...d2328.dwg`에 대해 `file_create_file_handler_async`
+- **`Failed to open file, Permission denied`** (CorrelationId: `ec1fdc72-...`)
+
+### D) 해석(Phase 6 관점)
+
+- 이 재현은 “파일이 손상되어 열리지 않음”보다는, **MIP가 temp 파일을 열어야 하는 순간에 파일이 잠금/권한 문제로 열리지 않는 상태**가 1순위로 보인다.
+- 특히 Native에서의 `CloseHandle` 치명 예외(0xC0000008)가 같은 타임라인에 존재하므로,
+  - **핸들 정리/keeper close 경로 안정화(예외 삼키기/정리 순서 보장)**가 우선 과제로 남는다.
+
+## 4.2 (추가 기록) 2026-05-28 결정/정리 사항(오늘 대화 핵심)
+
+### A) Native 롤백(복원) 결정
+
+- **결정**: “Managed(플러그인) 소스는 유지, Native만 5단계 완료 시점으로 복원”
+- **복원 기준 커밋**: `9832813` (메시지: *Complete Phase 2 steps 4-5: Setup packaging, VFS activation, and Native output fix.*)
+- **복원 방식**: `git checkout 9832813 -- eDIAN.Hook.Native`
+- **의미**: 이후 L2/L3/L4 등 Native 변경은 **단일 변화로 재도입**하며 영향 범위를 좁힌다.
+
+### B) 문서/기준 정리(단일 기준 확정)
+
+- “문서/기준 혼선”을 줄이기 위해 아래 구조를 확정:
+  - **설계 계약(타이밍)**: `ROADMAP_PHASE2_VFS_LIFECYCLE.md`
+  - **판정·로그 수집(단일 기준)**: `ZWCAD_VFS_ENGINEERING_GUIDE.md`
+  - **진행/체크리스트**: `ROADMAP_PHASE2_VFS.md`
+  - **승인/환경 기록**: `PHASE2_KICKOFF_GATE.md`
+  - **ZWCAD 특성 외부 조사 노트**: `ZWCAD_VFS_ZWCAD_CHARACTERISTICS_RESEARCH.md`
+- 특히 Lifecycle의 로그 SOP 상세(표/PS 예시)는 Engineering Guide로 이관하여 **중복 최소화**함.
+
+### C) “원인 1순위” 판정 업데이트(손상 vs 잠금)
+
+오늘 재현 로그(`vfs_console_24180.log` + `application.log` + `close_flow.log` + `mip_sdk.miplog`) 기준으로,
+
+- 1순위는 “손상된 DWG”라기보다 **MIP가 temp 파일을 열 때의 잠금/권한 문제(Permission denied)** 로 보는 것이 합리적이다.
+- 동일 타임라인에서 Native의 `CloseHandle` 치명 예외(0xC0000008)가 관측되므로,
+  - “CloseHandle 경로 안정화(예외 방어 + 핸들 정리 순서 보장)”가 Phase 6의 선행 과제로 강화됨.
+
 ## 5. 롤백(복원) 관점 제안
 
 Phase 6에서 관측된 바와 같이, `FileHooks.cpp`의 저장/닫기 경로는 **작은 조건 변화도 프리징으로 직결**될 수 있다.  
