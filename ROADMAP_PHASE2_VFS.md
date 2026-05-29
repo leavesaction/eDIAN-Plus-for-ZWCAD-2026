@@ -245,7 +245,7 @@ flowchart TB
 | L3 | Native: QSAVE **SaveExposed** / 저장 후 디스크만 기화 (인계 **I3**) | Hook.Native | **구현 1차** (§4.15) — sidecar만 passthrough, `_uuid.dwg` 가상화+SaveExposed. **실측 대기**: `[SAVE-IO]`·기능 게이트·G4 |
 | L4 | Native: 외부(EPDF) 시작 노출 · 종료 실물 기화 (인계 **I4**) | Hook.Native | 대기 |
 | L5 | Native: 로그 `[CLOSE]` / `[SAVE-IO]` / `[EXTERNAL]` | Hook.Native | 대기 (L2~L4와 동반) |
-| L6 | 실측: 인계 **I1~I6** — Open 기화·QSAVE·닫기·재오픈·temp 삭제 | 박부장 | **부분** — 저장·닫기·재오픈 **기능 정상**(§4.12·**§4.14** 원복 후 재확인). **G4 미달**: `mip\temp`·세션 고스트·bak 등 **디스크 노출**(§4.14 E, 추후 L3→L6). **미완**: 순간 노출→기화(I1·I3), L3 정식·I5 `[CLOSE]` 로그 확정 |
+| L6 | 실측: 인계 **I1~I6** — Open 기화·QSAVE·닫기·재오픈·temp 삭제 | 박부장 | **기능 게이트 통과** — Debug §4.23 + **Release MSI** §4.24. **G4 미달**·L3 정식·L4·회귀 체크리스트 전항목 잔여 |
 | L7 | AutoCAD 회귀 1회 | 박부장 | 대기 |
 
 - **호환성 매트릭스** (AutoCAD 호환성 보고서 H1~H10 요약):
@@ -265,8 +265,8 @@ flowchart TB
 
 - **회귀 테스트 체크리스트** (Phase 1 + VFS):
 
-  - [ ] 플러그인 로드, `MainForm` 팔레트
-  - [ ] MIP 로그인/로그아웃, 보호 DWG 열기·저장·닫기
+  - [x] 플러그인 로드, `MainForm` 팔레트 (Release MSI §4.24)
+  - [x] MIP 로그인/로그아웃, 보호 DWG 열기·저장·닫기 (Release MSI §4.24 — VFS Open/QSAVE/닫기/재오픈)
   - [ ] 보호 문서 Save/Print/Publish/Copy 차단 (리본·명령)
   - [ ] `eDIAN.Service.exe` PING/PAUSE 및 종료 시 temp 세션 소거
   - [ ] dwl/dwl2/tmp/ac$/zw$/zs$ 등 **플러그인 temp 밖**에 원본 흔적 없음
@@ -274,7 +274,7 @@ flowchart TB
   - [ ] (선택) 크래시 덤프·Procmon 캡처 아카이브
 
 - **권장 구현·실측 순서**: **L3(정식 SaveExposed)** → **L6(인계 I1~I6)** → **L2 검증(I5)** → **L4** → L5 → L7
-- **상태**: **진행 중** — L1 완료, L2 구현·L3/L6 부분, L4~L5·L7 대기 (2026-05-29)
+- **상태**: **진행 중** — L6 **Debug+Release MSI 기능 통과** (§4.23~4.24); G4·L3 정식·L4~L5·L7·회귀 체크리스트 잔여 (2026-05-29)
 
 ---
 

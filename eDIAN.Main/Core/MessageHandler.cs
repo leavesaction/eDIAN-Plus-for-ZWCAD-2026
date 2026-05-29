@@ -63,6 +63,7 @@ namespace eDIAN.Data
 
             if (!File.Exists(filePath)) 
             {
+                logger.Warn($"messages.xml not found (UI strings unavailable): {filePath}");
                 return;
             }
 

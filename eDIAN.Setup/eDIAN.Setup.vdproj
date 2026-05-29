@@ -441,6 +441,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_D4E5F6A7B8C94D0E1F2A3B4C5D6E7F8"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_3A50A8B5458049219CF53217733C6712"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -5860,6 +5866,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D4E5F6A7B8C94D0E1F2A3B4C5D6E7F8"
+            {
+            "SourcePath" = "8:..\\eDIAN.Main\\Resources\\global\\messages.xml"
+            "TargetName" = "8:messages.xml"
+            "Tag" = "8:"
+            "Folder" = "8:_B8D5F2A314C647E0B9C3D4E5F607123"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8F077B1CC6994E3F9C675058B869966F"
             {
             "SourcePath" = "8:..\\..\\msipc\\IRMProtectors\\1048\\microsoft.office.irm.msoprotector.xls"
@@ -8741,6 +8767,28 @@
                     "Property" = "8:_69C9B9454ED546929EA09F7820B58675"
                         "Folders"
                         {
+                        }
+                    }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_A7C4E1F203B546D9A8B2C3D4E5F6012"
+                    {
+                    "Name" = "8:Resources"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_F2B3C4D5E6F74890A1B2C3D4E5F60712"
+                        "Folders"
+                        {
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_B8D5F2A314C647E0B9C3D4E5F607123"
+                            {
+                            "Name" = "8:global"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_C1D2E3F4A5B64789C0D1E2F3A4B5C6D7"
+                                "Folders"
+                                {
+                                }
+                            }
                         }
                     }
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_C3C6034900C2401381E9CC820D7CF0CC"
