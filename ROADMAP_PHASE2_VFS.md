@@ -37,7 +37,7 @@
 | G1 | `eDIAN.Hook` + `eDIAN.Hook.Native`를 ZWCAD 솔루션에 포함하고 **x64 Debug/Release 빌드** 성공 |
 | G2 | `eDIAN.Main\bin\x64\{Configuration}\`에 `eDIAN.Hook.dll`, `eDIAN.Hook.Native.dll` 자동 배치 |
 | G3 | MSI(`eDIAN.Setup`)에 Native/Hook DLL 포함 (ZWCAD 레지스트리·경로 유지) |
-| G4 | ZWCAD에서 **dwl/tmp/plot/publish 임시 파일 가상화** 및 세션 종료 시 흔적 소거 실측 통과 |
+| G4 | ZWCAD에서 **복호화 temp(dwl/tmp 등) 노출 최소화** — Open/Save/외부는 **필요 순간만 실물화 후 디스크 기화**, Close에서 Plugin 후처리 가능 상태 확보; 세션 종료 시 흔적 소거 실측 통과 ([LIFECYCLE](./ROADMAP_PHASE2_VFS_LIFECYCLE.md) §3.1·§3.2) |
 | G5 | `HookConstants` ZWCAD 프로필을 **실측 데이터**로 검증·보정 |
 
 ### 1.2 In Scope
@@ -228,23 +228,24 @@ flowchart TB
 
 ### 6단계 — ZWCAD 실측·튜닝
 
-- **목적**: 코드에 정의된 ZWCAD 프로필을 **현장 데이터**로 검증·보정.
-- **설계 상세 (실물 노출·가상화 생명주기)**: [ROADMAP_PHASE2_VFS_LIFECYCLE.md](./ROADMAP_PHASE2_VFS_LIFECYCLE.md)
+- **목적**: ZWCAD 프로필을 **현장 데이터**로 검증·보정하고, **Plugin 선처리 → Native 가상화·운영 → Plugin 후처리** 인계([LIFECYCLE](./ROADMAP_PHASE2_VFS_LIFECYCLE.md) §3.2 **I1~I6**)를 실측으로 통과시킨다.
+- **설계 상세 (실물 노출·가상화 생명주기)**: [ROADMAP_PHASE2_VFS_LIFECYCLE.md](./ROADMAP_PHASE2_VFS_LIFECYCLE.md) — §3.1 주요 흐름, §3.2 비침범·인계 조건
 - **판정·검증 단일 기준**: [ZWCAD_VFS_ENGINEERING_GUIDE.md](./ZWCAD_VFS_ENGINEERING_GUIDE.md) (P0/P1/P2, ETW [A/B/C/D], 실패 시 로그 교차 SOP)
 - **진행 기록(성공/실패 요약)**: [PHASE2_STEP6_FIELD_TEST_HISTORY.md](./PHASE2_STEP6_FIELD_TEST_HISTORY.md)
 
-#### 6a — MIP·저장·닫기 실물 노출 (Native)
+#### 6a — MIP·저장·닫기 실물 노출 (Lifecycle)
 
-> 시점별 계약·구현 개념·검증 시나리오는 **LIFECYCLE 문서** 참조. 본 절은 **진행 상태만** 관리.
+> 시점별 계약·인계(I1~I6)·구현 개념은 **LIFECYCLE** 참조. 본 절은 **진행 상태만** 관리.  
+> **6a Managed 변경**: **L1만** (이후 Managed는 인계 조건 유지·후처리, Native 정책 비침범).
 
 | ID | 항목 | 담당 | 상태 |
 |----|------|------|------|
-| L1 | Managed: `equals`에서 `isReadOnly` 제외 | Main | **완료** (`608f91f`, `feature/phase2-vfs`) |
-| L2 | Native: 닫기 **Materialize + VirtualRelease** | Hook.Native | **구현** (Debug 빌드, L6 실측 대기) |
-| L3 | Native: QSAVE **SaveExposed** / 저장 후 디스크만 기화 | Hook.Native | 대기 |
-| L4 | Native: 외부(EPDF) 시작 노출 · 종료 실물 기화 | Hook.Native | 대기 |
-| L5 | Native: 로그 `[CLOSE]` / `[SAVE-IO]` / `[EXTERNAL]` | Hook.Native | 대기 |
-| L6 | 실측: 저장 → 닫기 → `test_01` 재오픈 | 박부장 | 대기 |
+| L1 | Managed: `equals`에서 `isReadOnly` 제외 | Main | **완료** (`608f91f`) |
+| L2 | Native: 닫기 **Materialize + VirtualRelease** (인계 **I5**) | Hook.Native | **구현** — L6에서 I5·`[CLOSE]`·`applyProtection` 교차 검증 대기 |
+| L3 | Native: QSAVE **SaveExposed** / 저장 후 디스크만 기화 (인계 **I3**) | Hook.Native | **부분** — JIT 억제 + `mip\temp` passthrough(응급, `630f3a2`). **정식 SaveExposed·디스크만 기화 대기** (passthrough 제거는 L3 완료 조건) |
+| L4 | Native: 외부(EPDF) 시작 노출 · 종료 실물 기화 (인계 **I4**) | Hook.Native | 대기 |
+| L5 | Native: 로그 `[CLOSE]` / `[SAVE-IO]` / `[EXTERNAL]` | Hook.Native | 대기 (L2~L4와 동반) |
+| L6 | 실측: 인계 **I1~I6** — Open 기화·QSAVE·닫기·재오픈·temp 삭제 | 박부장 | **부분** — QSAVE/닫기/재오픈 5회 성공([히스토리](./PHASE2_STEP6_FIELD_TEST_HISTORY.md) §4.12). **미완**: Open·Save **순간 노출 후 기화**, Close 인계(I5) 로그 확정 |
 | L7 | AutoCAD 회귀 1회 | 박부장 | 대기 |
 
 - **호환성 매트릭스** (AutoCAD 호환성 보고서 H1~H10 요약):
@@ -272,7 +273,8 @@ flowchart TB
   - [ ] ZWCAD **정상 종료** 및 **강제 종료** 후 세션 폴더 소거
   - [ ] (선택) 크래시 덤프·Procmon 캡처 아카이브
 
-- **상태**: **진행 중** — §6a L1 완료, L2~L7 대기 (2026-05-27)
+- **권장 구현·실측 순서**: **L3(정식 SaveExposed)** → **L6(인계 I1~I6)** → **L2 검증(I5)** → **L4** → L5 → L7
+- **상태**: **진행 중** — L1 완료, L2 구현·L3/L6 부분, L4~L5·L7 대기 (2026-05-29)
 
 ---
 
@@ -365,7 +367,7 @@ flowchart TB
 | 3 Managed 연결 | 2026-05-26 | VFS Install 비활성 |
 | 4 Setup | 2026-05-26 | MSI 빌드·설치·레지스트리·Hook DLL 실측 완료 |
 | 5 VFS 활성화 | 2026-05-26 | ZWCAD Debug 기동·`vfs_console` ZWCAD.exe·Vaporize 확인 |
-| 6 실측·튜닝 | 2026-05-27~ | §6a LIFECYCLE 트랙 진행 중 |
+| 6 실측·튜닝 | 2026-05-27~ | §6a: L1 완료, 저장 응급(passthrough)·L6 QSAVE 부분, L3 정식·인계 I1~I6 미완 |
 | 7 Baseline 고정 | | |
 
 ---
@@ -383,9 +385,9 @@ flowchart TB
 | **G** | 실측·튜닝·태그 | 6~7단계 |
 | **L** | MIP·저장·닫기 실물 노출 ([LIFECYCLE](./ROADMAP_PHASE2_VFS_LIFECYCLE.md)) | 6a (L1~L7) |
 
-**권장 최소 진행**: **A → B → C** (VFS 비활성 빌드 성공) → 박부장 확인 → **E → F → G** → **L2~L6** (MIP 재오픈 실측 통과 후 7단계)
+**권장 최소 진행**: **A → B → C** (VFS 비활성 빌드 성공) → 박부장 확인 → **E → F → G** → **L3 → L6(인계 I1~I6) → L2(I5)** (Lifecycle 실측 통과 후 7단계)
 
 ---
 
-**Last Updated**: 2026-05-27  
-**Status**: **5단계 완료** — **6단계** 진행 중 (H1~H10 + **§6a LIFECYCLE**)
+**Last Updated**: 2026-05-29  
+**Status**: **5단계 완료** — **6단계** 진행 중 (H1~H10 + **§6a LIFECYCLE**, Plugin↔Native 인계 §3.2)
