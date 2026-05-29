@@ -32,16 +32,17 @@ struct VirtualFile {
     HANDLE hKeeper;                 ///< 파일 삭제 방지를 위한 유지(Keeper) 핸들
     std::atomic<size_t> currentSize; ///< 현재 파일의 실제 데이터 크기
     size_t totalCapacity;           ///< 현재 할당된 메모리 전체 용량
-    std::mutex fileMtx;             ///< 파일 데이터 접근 동기화용 뮤텍스
+    std::recursive_mutex fileMtx;   ///< storage·Sync·EnsureCapacity 동일 스레드 재진입 허용
     std::atomic<int> refCount;      ///< 이 파일을 참조 중인 핸들 개수
     bool isModified;                ///< 데이터 수정 여부 (수정 시 나중에 디스크에 커밋)
     std::atomic<bool> isManifesting; ///< 현재 JIT 실체화(파일 생성) 작업 진행 중인지 여부
+    std::atomic<bool> saveExposed;   ///< L3: QSAVE 구간 _uuid.dwg 실물 I/O (저장 후 디스크만 기화)
     ULONGLONG lastVaporizedTime;    ///< 마지막으로 실물 파일이 삭제(기화)된 시간
 
     VirtualFile(const std::wstring& p)
         : path(p), hMapping(NULL), pBase(NULL), hKeeper(INVALID_HANDLE_VALUE),
           currentSize(0), totalCapacity(0), refCount(0), isModified(false),
-          isManifesting(false), lastVaporizedTime(0) {}
+          isManifesting(false), saveExposed(false), lastVaporizedTime(0) {}
 
     ~VirtualFile() { Cleanup(); }
 
@@ -69,7 +70,7 @@ struct VirtualFile {
     bool EnsureCapacity(size_t needed) {
         if (needed <= totalCapacity && hMapping != NULL)
             return true;
-        std::lock_guard<std::mutex> lock(fileMtx);
+        std::lock_guard<std::recursive_mutex> lock(fileMtx);
         if (needed <= totalCapacity && hMapping != NULL)
             return true;
 

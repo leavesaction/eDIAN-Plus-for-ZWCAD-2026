@@ -29,6 +29,15 @@ namespace eDIAN.Hook
         [DllImport(DllName, CallingConvention = CallingConvention.Winapi)]
         public static extern void UninstallHooks();
 
+        [DllImport(DllName, CallingConvention = CallingConvention.Winapi)]
+        public static extern void ArmZwcadSaveWindow();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        public static extern bool PrepareMipTempDwgForCloseCommit(string lpMipUuidDwgPath);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        public static extern bool FinalizeMipTempDwgAfterCadOpen(string lpMipUuidDwgPath);
+
 
 
         // --- Win32 APIs for Surrogate Management ---

@@ -3,6 +3,7 @@ using ZwSoft.ZwCAD.DatabaseServices;
 using ZwSoft.ZwCAD.PlottingServices;
 using eDIAN.Core;
 using eDIAN.Data;
+using eDIAN.Hook;
 using eDIAN.Main.API;
 using eDIAN.Main.Core;
 using eDIAN.Main.Data;
@@ -492,6 +493,7 @@ namespace eDIAN.Main
                     // 저장 명령어가 실행되면 needLabeling true로 설정 (문서가 닫힐때 레이블이 적용됨.)
 
                     protectedDocument.needLabeling = true;
+                    VfsInterceptor.ArmSaveWindow();
                 }
             }
 
@@ -599,6 +601,11 @@ namespace eDIAN.Main
             logger.Debug("---------------------------------------------------");
             logger.Debug($" - Global Command : '{e.GlobalCommandName}'");
 
+            if (e.GlobalCommandName.Equals("QSAVE") || e.GlobalCommandName.Equals("SAVE"))
+            {
+                VfsInterceptor.ArmSaveWindow();
+            }
+
             logger.Debug("commandWillStart ---------------------------------------------------\n");
         }
 
@@ -703,6 +710,8 @@ namespace eDIAN.Main
 
             // 임시 경로에 대한 everyone 사용자 권한 허용
             FileManager.setUserMipTempWritePermissions(true);
+
+            VfsInterceptor.ArmSaveWindow();
 
             logger.Debug("beginSave ---------------------------------------------------\n");
         }

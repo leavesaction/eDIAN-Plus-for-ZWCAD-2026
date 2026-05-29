@@ -49,5 +49,49 @@ namespace eDIAN.Hook
             _isInstalled = false;
         }
 
+        /// <summary>QSAVE/SAVE 구간 — Native 저장 창(8s) 시작 (zws sidecar 없을 때).</summary>
+        public static void ArmSaveWindow()
+        {
+            if (!_isInstalled) return;
+            try
+            {
+                NativeMethods.ArmZwcadSaveWindow();
+            }
+            catch (Exception ex)
+            {
+                logger.Warn($"[VFS] ArmSaveWindow failed: {ex.Message}");
+            }
+        }
+
+        /// <summary>CAD Open 완료 후 — canonical temp _uuid.dwg 디스크 기화 (L1).</summary>
+        public static void FinalizeOpenVaporize(string mipTempDwgPath)
+        {
+            if (!_isInstalled || string.IsNullOrWhiteSpace(mipTempDwgPath))
+                return;
+            try
+            {
+                NativeMethods.FinalizeMipTempDwgAfterCadOpen(mipTempDwgPath);
+            }
+            catch (Exception ex)
+            {
+                logger.Warn($"[VFS] FinalizeOpenVaporize failed: {ex.Message}");
+            }
+        }
+
+        /// <summary>닫기 ApplyProtection 직전 — temp _uuid.dwg 실물 확보.</summary>
+        public static bool PrepareCloseCommit(string mipTempDwgPath)
+        {
+            if (!_isInstalled || string.IsNullOrWhiteSpace(mipTempDwgPath))
+                return false;
+            try
+            {
+                return NativeMethods.PrepareMipTempDwgForCloseCommit(mipTempDwgPath);
+            }
+            catch (Exception ex)
+            {
+                logger.Warn($"[VFS] PrepareCloseCommit failed: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

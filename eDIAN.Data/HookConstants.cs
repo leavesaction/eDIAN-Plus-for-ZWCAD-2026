@@ -78,7 +78,11 @@ namespace eDIAN.Data
             @"\temp\zwpubl~",
             @"\temp\zwplot~",
             @"\temp\zwpublish_",
-            @"\temp\zwplot_"
+            @"\temp\zwplot_",
+            // MIP temp — ZWCAD QSAVE sidecar / rename 마무리 (L3, passthrough only)
+            @"\mip_data\mip\temp\zws",
+            @"\mip_data\mip\temp\zwTm",
+            @"\mip_data\mip\temp\zwsv",
         };
 
         // ============================================================================

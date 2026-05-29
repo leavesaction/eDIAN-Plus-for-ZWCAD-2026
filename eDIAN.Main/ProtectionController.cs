@@ -767,12 +767,37 @@ namespace eDIAN.Main
             try
             {
                 // 권한 부여된 파일이 존재하는 경우 CAD 파일을 읽기/쓰기 모드로 열고
-                // 열린 파일 CAD 파일 객체를 반환
+                // 열린 파일 CAD 파일 객체를 반환 (VFS·MIP 복호화 직후 1회 재시도)
 
-                Document document = CadApplication.DocumentManager.Open(openFilePath, isOpenReadOnly);
+                Document document = null;
+                const int maxOpenAttempts = 2;
+                for (int attempt = 1; attempt <= maxOpenAttempts; attempt++)
+                {
+                    try
+                    {
+                        document = CadApplication.DocumentManager.Open(openFilePath, isOpenReadOnly);
+                        if (document != null)
+                            break;
+                        logger.Warn($"Open attempt {attempt}/{maxOpenAttempts} returned null for ...\\{Path.GetFileName(openFilePath)}");
+                    }
+                    catch (Exception openEx)
+                    {
+                        logger.Warn($"Open attempt {attempt}/{maxOpenAttempts} failed: {openEx.Message}");
+                        if (attempt >= maxOpenAttempts)
+                            throw;
+                    }
+                    if (attempt < maxOpenAttempts)
+                        System.Threading.Thread.Sleep(250);
+                }
 
                 if (document != null)
                 {
+                    if (protectedDocument.isProtected &&
+                        !String.IsNullOrWhiteSpace(protectedDocument.decryptedTemporaryFilePath))
+                    {
+                        VfsInterceptor.FinalizeOpenVaporize(protectedDocument.decryptedTemporaryFilePath);
+                    }
+
                     // 문서 handle, 해시코드, 읽기전용 여부 추가
 
                     protectedDocument.handle = document.Window.Handle;
@@ -1571,6 +1596,11 @@ namespace eDIAN.Main
             CloseFlowDiagnostics.LogPhaseByPath(protectedDocument.decryptedTemporaryFilePath,
                 CloseFlowDiagnostics.ClosePhase.ApplyProtectionBegin,
                 $"filePath='{Path.GetFileName(protectedFilePath)}'");
+
+            if (!String.IsNullOrWhiteSpace(protectedDocument.decryptedTemporaryFilePath))
+            {
+                VfsInterceptor.PrepareCloseCommit(protectedDocument.decryptedTemporaryFilePath);
+            }
 
             try
             {

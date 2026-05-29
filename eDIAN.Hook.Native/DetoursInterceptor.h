@@ -34,6 +34,15 @@ extern "C" {
      * @brief Trigger a re-synchronization of hooks (called periodically or on demand).
      */
     __declspec(dllexport) void WINAPI SyncHooks();
+
+    /** @brief QSAVE/SAVE 구간 저장 창 시작 (sidecar 없을 때 Managed에서 호출). */
+    __declspec(dllexport) void WINAPI ArmZwcadSaveWindow();
+
+    /** @brief 닫기 ApplyProtection 직전 — temp _uuid.dwg 실물 확보 (storage 유지). */
+    __declspec(dllexport) BOOL WINAPI PrepareMipTempDwgForCloseCommit(LPCWSTR lpMipUuidDwgPath);
+
+    /** @brief CAD Open 완료 후 — canonical _uuid.dwg 디스크만 기화 (L1, storage·고스트 유지). */
+    __declspec(dllexport) BOOL WINAPI FinalizeMipTempDwgAfterCadOpen(LPCWSTR lpMipUuidDwgPath);
 }
 
 // --- Internal NT Native structures for Ldr notification ---

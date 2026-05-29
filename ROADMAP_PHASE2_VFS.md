@@ -242,10 +242,10 @@ flowchart TB
 |----|------|------|------|
 | L1 | Managed: `equals`에서 `isReadOnly` 제외 | Main | **완료** (`608f91f`) |
 | L2 | Native: 닫기 **Materialize + VirtualRelease** (인계 **I5**) | Hook.Native | **구현** — L6에서 I5·`[CLOSE]`·`applyProtection` 교차 검증 대기 |
-| L3 | Native: QSAVE **SaveExposed** / 저장 후 디스크만 기화 (인계 **I3**) | Hook.Native | **부분** — JIT 억제 + `mip\temp` passthrough(응급, `630f3a2`). **정식 SaveExposed·디스크만 기화 대기** (passthrough 제거는 L3 완료 조건) |
+| L3 | Native: QSAVE **SaveExposed** / 저장 후 디스크만 기화 (인계 **I3**) | Hook.Native | **구현 1차** (§4.15) — sidecar만 passthrough, `_uuid.dwg` 가상화+SaveExposed. **실측 대기**: `[SAVE-IO]`·기능 게이트·G4 |
 | L4 | Native: 외부(EPDF) 시작 노출 · 종료 실물 기화 (인계 **I4**) | Hook.Native | 대기 |
 | L5 | Native: 로그 `[CLOSE]` / `[SAVE-IO]` / `[EXTERNAL]` | Hook.Native | 대기 (L2~L4와 동반) |
-| L6 | 실측: 인계 **I1~I6** — Open 기화·QSAVE·닫기·재오픈·temp 삭제 | 박부장 | **부분** — QSAVE/닫기/재오픈 5회 성공([히스토리](./PHASE2_STEP6_FIELD_TEST_HISTORY.md) §4.12). **미완**: Open·Save **순간 노출 후 기화**, Close 인계(I5) 로그 확정 |
+| L6 | 실측: 인계 **I1~I6** — Open 기화·QSAVE·닫기·재오픈·temp 삭제 | 박부장 | **부분** — 저장·닫기·재오픈 **기능 정상**(§4.12·**§4.14** 원복 후 재확인). **G4 미달**: `mip\temp`·세션 고스트·bak 등 **디스크 노출**(§4.14 E, 추후 L3→L6). **미완**: 순간 노출→기화(I1·I3), L3 정식·I5 `[CLOSE]` 로그 확정 |
 | L7 | AutoCAD 회귀 1회 | 박부장 | 대기 |
 
 - **호환성 매트릭스** (AutoCAD 호환성 보고서 H1~H10 요약):
